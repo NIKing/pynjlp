@@ -40,11 +40,28 @@ class BinTrie(BaseNode):
         self.size += 1
         #print('-----------end-----------')
     
+    def get(self, key): 
+        branch = self
+        for c in key:
+            if not branch:
+                return None
+
+            branch = branch.getChild(c)
+
+        if not branch:
+            return None
+        
+        # 这句可以保证只有成词的节点被返回
+        if branch.status == Status.WORD_END or branch.status == Status.WORD_MIDDLE:
+            return None
+
+        return branch.getValue()
+
+
     def getChild(self, c):
         return self.child[hash_code(c)]
 
     def addChild(self, node):
-
         add = False
 
         c = node.getChar()
@@ -76,17 +93,29 @@ class BinTrie(BaseNode):
     def getChar(self):
         return 0 # 根节点没有char
     
+    def getSize(self):
+        return self.size
+    
+    def entrySet(self):
+        """获取键值对集合"""
+        entrySet = {}
+        for node in self.child:
+            if not node:
+                continue
+
+            node.walk(entrySet)
+
+        return entrySet 
+
     def parseText(self, text):
         """匹配文本, 根据字典返回最短匹配，比如有'工'和'工信部', 返回'工'"""
-        
         begin, text_length, word_list = 0, len(text), []
         for i, c in enumerate(text):
 
             state = self.transition(c)
-            print(state)
             if state:
+                
                 value = state.getValue()
-                print(value)
                 if value:
                     word_list.append(text[begin:i+1])
                 

@@ -1,25 +1,25 @@
 import sys
 sys.path.append('/pynjlp')
 
-from .CommonDictionaryMaker import CommonDictionaryMaker
+from nlp.corpus.dictionary.CommonDictionaryMaker import CommonDictionaryMaker
 
 from nlp.utility.Perdefine import Perdefine 
-from nlp.tag.Nature import Nature
+from nlp.corpus.tag.Nature import Nature
 
-class NatrueDictionaryMaker(CommonDictionaryMaker):
+class NatureDictionaryMaker(CommonDictionaryMaker):
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
 
     def roleTag(self, sentence_list):
         print('开始角色标注')
         
         new_sentence_list = []
         for i, sentence in enumerate(sentence_list):
-            print(f'{i}/{len(sentence_list)}')
+             print(f'{i}/{len(sentence_list)}')
 
              new_sentence_list.append(sentence)
-             new_sentence_list.append([Perdefine.TAG_BEGIN, Natue.begin])
-             new_sentence_list.append([Perdefind.TAG_END, Natue.end])
+             new_sentence_list.append([Perdefine.TAG_BEGIN, Nature.begin])
+             new_sentence_list.append([Perdefine.TAG_END, Nature.end])
         
         return new_sentence_list
 
@@ -32,7 +32,7 @@ class NatrueDictionaryMaker(CommonDictionaryMaker):
             # 前缀
             pre = None
             for word in word_list:
-                self.dictionaryMaker.add(word)
+                self.dictionaryMaker.addWord(word)
 
                 if pre:
                     self.nGramDictionaryMaker.addPair(pre, word)

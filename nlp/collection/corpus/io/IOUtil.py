@@ -1,17 +1,10 @@
 
 def loadDictionary(path):
-    if not path:
-        return []
-
-    splitter, line_list = "\t", []
-    try:
-        with open(path, 'r', encoding='utf8') as f:
-            line_list = f.readlines()
-    except IOError as e:
-        print(f'读取失败:{e}')
     
-    storage = {}
-    for line in line_list:
+    lineList = readlinesText(path)
+    splitter, storage = "\t", {}
+
+    for line in lineList:
         
         param = line.rstrip('\n').split(splitter)
         
@@ -31,4 +24,17 @@ def loadDictionary(path):
         storage[key] = { 'nature': nature, 'frequency': frequency, 'totalFrequency': totalFrequency }
     
     return storage
+
+def readlinesText(path):
+    if not path:
+        return []
+
+    line_list = []
+    try:
+        with open(path, 'r', encoding='utf8') as f:
+            line_list = f.readlines()
+    except IOError as e:
+        print(f'读取失败:{e}')
+
+    return line_list
 

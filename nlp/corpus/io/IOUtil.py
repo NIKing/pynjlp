@@ -33,7 +33,7 @@ def loadDictionary(path):
     
     return storage
 
-def readlinesText(filePath):
+def readlinesTxt(filePath):
     if not filePath:
         return
     
@@ -44,4 +44,15 @@ def readlinesText(filePath):
     except Exception as e:
         print('读取失败', e)
     
+    #return line_list
     return [w.rstrip('\n') for w in line_list]
+
+def writeTxtByList(filePath, dataList): 
+    if not filePath or len(dataList) <= 0:
+        return
+
+    try:
+        with open(filePath, "w", encoding='utf8') as file:
+           file.writelines('\n'.join(dataList))
+    except IOError:
+        print('写入失败', IOError)
