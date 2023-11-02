@@ -56,3 +56,17 @@ def writeTxtByList(filePath, dataList):
            file.writelines('\n'.join(dataList))
     except IOError:
         print('写入失败', IOError)
+
+
+def getFileList(folderPath):
+    if not folderPath:
+        return []
+    
+    fileList = []
+    try:
+        fileList = os.listdir(folderPath)
+        fileList = [folderPath +'/'+ file for file in fileList]
+    except IOError:
+        print('【】文件夹未找到文件')
+
+    return fileList

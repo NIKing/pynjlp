@@ -47,12 +47,13 @@ class BinTrie(BaseNode):
                 return None
 
             branch = branch.getChild(c)
-
+        
         if not branch:
             return None
+        #print(branch.getChar(), branch.status, Status.WORD_END, '???????')
         
         # 这句可以保证只有成词的节点被返回
-        if branch.status == Status.WORD_END or branch.status == Status.WORD_MIDDLE:
+        if branch.status != Status.WORD_END and branch.status != Status.WORD_MIDDLE:
             return None
 
         return branch.getValue()

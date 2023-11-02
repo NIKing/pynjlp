@@ -14,11 +14,11 @@ class NGramDictionaryMaker():
     def addPair(self, first, second):
         combine = first.getValue() + "@" + second.getValue()
 
-        frequency = trie.get(combine)
+        frequency = self.trie.get(combine)
         if not frequency:
             frequency = 0
 
-        trie.put(combine, frequency+1)
+        self.trie.put(combine, frequency+1)
 
         #同时统计标签转移情况
         #self.tmDictionaryMaker.addPair(first.getLabel(), second.getLabel())
@@ -32,8 +32,11 @@ class NGramDictionaryMaker():
         """保存NGram词典"""
         try:
             entries = self.trie.entrySet()
-            entries = [key +" "+ value for key, value in entries.items()]
+            print(entries)
 
+            entries = [key +" "+ value for key, value in entries.items()]
+            
+            print(path, entries)
             writeTxtByList(path, entries)
         except Exception as e:
             print(f'保存到【{path}】失败【{e}】')

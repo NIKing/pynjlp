@@ -27,8 +27,9 @@ class DictionaryMaker():
 
         try:
             # 获取词典条目(在addWord中put到字典树里了)，并保存
+            # 注意这里的toString()，实际调用 Item 的方法，用于返回条目的信息
             entries = self.trie.entrySet()
-            entries = [entry for entry in entries.values()]
+            entries = [entry.toString() for entry in entries.values()]
             
             print(path, entries)
             writeTxtByList(path, entries)

@@ -34,9 +34,9 @@ class Sentence:
 
                 wordList.append(word)
         
-        # 按照无词性来解析
+        # 按照无词性来解析，通过正则分割句子（\s 空格分割符）
         if len(wordList) <= 0:
-            for w in param.split(r'\s+'):
+            for w in re.split(r'\s+', param):
                 wordList.append(Word(w))
 
         return Sentence(wordList)

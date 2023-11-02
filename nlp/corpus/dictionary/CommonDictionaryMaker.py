@@ -19,9 +19,11 @@ class CommonDictionaryMaker(ABC):
         """添加到词典，比较灵活的添加，不用直接放在字典中"""
         pass
 
-    def compute(self, sentence_list):
-        self.roleTag(sentence_list)
-        self.addDictionary(sentence_list)
+    def compute(self, sentenceList):
+        self.sentenceList = sentenceList
+
+        self.roleTag()
+        self.addDictionary()
     
     def saveTxtTo(self, path):
         """保存普通词典和n元语法词典"""

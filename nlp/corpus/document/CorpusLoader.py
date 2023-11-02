@@ -1,30 +1,43 @@
 import sys
+import os
 sys.path.append('/pynjlp')
 
-from nlp.corpus.io.IOUtil import readlinesTxt
+from nlp.corpus.io.IOUtil import getFileList
 from nlp.corpus.document.Document import Document
+from nlp.corpus.document.sentence.Sentence import Sentence
 
 class CorpusLoader():
     def __init__(self):
         pass
     
-    @staticmethod
-    def convert2DocumentList(file):
-        document_list = []
-        file_data_list = readlinesTxt(file)
-        
-        for file_data in file_data_list:
-            document_list.append(Document.create(file_data))
 
-        return document_list
+    @staticmethod
+    def convert2DocumentList(folderPath):
+        documentList = []
+        fileList = getFileList(folderPath)
+
+        for file in fileList:
+            document = CorpusLoader.convert2Document(file)
+            documentList.append(document)
+
+        return documentList
     
     @staticmethod
     def convert2SentenceList(path):
-        simple_list = []
-        document_list = CorpusLoader.convert2DocumentList(path)
-
-        for document in document_list[:1]:
+        simpleList = []
+        documentList = CorpusLoader.convert2DocumentList(path)
+        
+        for document in documentList:
             for sentence in document.sentenceList:
-                simple_list.append(sentence.wordList)
+                simpleList.append(sentence.wordList)
 
-        return simple_list
+        return simpleList
+    
+    @staticmethod
+    def convert2Document(file):
+        document = Document.create(file)
+        if not document:
+            print(f'【{file}】读取失败')
+
+        return document
+
