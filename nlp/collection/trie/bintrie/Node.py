@@ -41,10 +41,11 @@ class Node(BaseNode):
             elif node.status == Status.NOT_WORD and target.status == Status.WORD_END:
                 target.status = Status.WORD_MIDDLE
 
-            elif node.status == Status.WORD_END and target.status != Status.WORD_END:
-                target.status = Status.WORD_MIDDLE
-
-                if not target.getValue():
+            elif node.status == Status.WORD_END:
+                if target.status != Status.WORD_END:
+                    target.status = Status.WORD_MIDDLE
+            
+                if not target.getValue(): 
                     add = True
 
                 target.setValue(node.getValue())

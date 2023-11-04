@@ -31,7 +31,6 @@ class DictionaryMaker():
             entries = self.trie.entrySet()
             entries = [entry.toString() for entry in entries.values()]
             
-            print(path, entries)
             writeTxtByList(path, entries)
         except Exception as e:
             print(f'保存到【{path}】失败【{e}】')

@@ -50,7 +50,6 @@ class BinTrie(BaseNode):
         
         if not branch:
             return None
-        #print(branch.getChar(), branch.status, Status.WORD_END, '???????')
         
         # 这句可以保证只有成词的节点被返回
         if branch.status != Status.WORD_END and branch.status != Status.WORD_MIDDLE:
@@ -101,10 +100,10 @@ class BinTrie(BaseNode):
         """获取键值对集合"""
         entrySet = {}
         for node in self.child:
-            if not node:
+            if not node or not node.getChar():
                 continue
-
-            node.walk(entrySet)
+            
+            node.walk([], entrySet)
 
         return entrySet 
 

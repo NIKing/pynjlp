@@ -28,4 +28,4 @@ class CommonDictionaryMaker(ABC):
     def saveTxtTo(self, path):
         """保存普通词典和n元语法词典"""
         self.dictionaryMaker.saveTxtTo(path + '.txt')
-        self.nGramDictionaryMaker.saveTxtTo(path + '.ngram.txt')
+        self.nGramDictionaryMaker.saveTxtTo(path)

@@ -31,20 +31,28 @@ class BaseNode(ABC):
     def setValue(self, value):
         self.value = value
     
-    def walk(self, entrySet):
+    def walk(self, words, entrySet):
+        
+        # 把每个节点的名词都累积起来
+        words.append(self.c)
 
         # 在java的代码中，这保存的方式本来是要申明 TrieEntry 的，在这里直接使用 dict 方式保存
         if self.status == Status.WORD_MIDDLE or self.status == Status.WORD_END:
-            entrySet[self.c] = self.value
+            key = ''.join(words)
+            entrySet[key] = self.value
         
         if len(self.child) <= 0:
             return
 
         for node in self.child:
-            if not node:
+            if not node or not node.getChar():
                 continue
-
-            node.walk(entrySet)
+            
+            # 注意这里，有子节点传入的必须是当前单词列表的copy
+            # 如果传入words，那么会把同一个根节点下的所有字符都放在最后的一个节点上
+            # 在节点有子节点的情况，说明当前节点有分叉，每个分叉都会有自己的结果。
+            new_words = words.copy()
+            node.walk(new_words, entrySet)
 
     @abstractmethod
     def getChild(self, c):

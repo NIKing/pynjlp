@@ -19,10 +19,8 @@ class NatureDictionaryMaker(CommonDictionaryMaker):
         
         new_sentence_list = []
         for i, sentence in enumerate(self.sentenceList):
-            print(f'{i}/{len(self.sentenceList)}')
-
             sentence.insert(0, Word(Perdefine.TAG_BEGIN, Nature.begin))
-            sentence.insert(-1, Word(Perdefine.TAG_END, Nature.end))
+            sentence.append(Word(Perdefine.TAG_END, Nature.end))
 
             new_sentence_list.append(sentence)
         
@@ -31,17 +29,17 @@ class NatureDictionaryMaker(CommonDictionaryMaker):
 
     def addDictionary(self):
         print('开始制作词典')
-        print(self.sentenceList)
 
         for wordList in self.sentenceList:
-            # 前缀
+            # 上一个单词
             pre = None
 
             for word in wordList:
                 self.dictionaryMaker.addWord(word)
-            
-                #if pre:
-                #    self.nGramDictionaryMaker.addPair(pre, word)
+                
+                # 二元语法词典
+                if pre:
+                    self.nGramDictionaryMaker.addPair(pre, word)
 
                 pre = word
 
