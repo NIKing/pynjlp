@@ -165,8 +165,10 @@ class DoubleArrayTrie:
         if self.allocSize <= pos:
             self.resize(pos + 1)
     
-        # 扩容策略
-        # 此循环的目标是找出满足check[begin + a1...an] == 0 的 n 个空闲空间, a1...an是siblings的n个节点
+        """
+        扩容策略
+        此循环的目标是找出满足check[begin + a1...an] == 0 的 n 个空闲空间, a1...an是siblings的n个节点
+        """
         while True:
             pos++
 
@@ -183,7 +185,7 @@ class DoubleArrayTrie:
 
             begin = pos - siblings[0].code # 当前位置离第一个兄弟节点的距离
             if self.allocSize <= (begin + siblings[len(siblings) - 1].code):
-                self.resize(begin + siblings[len(siblings) - 1].code + Character.MAX_VALUE)
+                self.resize(begin + siblings[len(siblings) - 1].code + 65535)
 
             if used.get(begin, 0):
                 continue
@@ -205,13 +207,16 @@ class DoubleArrayTrie:
         if 1.0 * nozero_num / (pos - self.nextCheckPos + 1) >= 0.95:
             self.nextCheckPos = pos
 
+
+
         used.setDefault(begin, 1)
 
         if self.size <= begin + siblings[len(siblings) - 1].code + 1:
             self.size = begin + siblings[len(siblings) - 1].code + 1
-        
-        # 检查每个子节点，给其赋值
+
+        # 检查每个子节点 
         # 给 check 赋值，建立子节点 (check[begin + s.code]) 与父节点 (begin) 的多对一的关系
+        # check的对应位置是：字符hash值 + 1 ，其赋的值是：上一个字符的位置(父节点)，初始等于1
         for i in range(len(siblings)):
             self.check[begin + siblings[i].code] = begin
         

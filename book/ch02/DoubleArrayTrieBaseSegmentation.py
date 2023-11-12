@@ -1,4 +1,8 @@
 
+import sys
+sys.path.append('/pynjlp')
+
+from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
 
 def createTinyDictionary():
     return {
