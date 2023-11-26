@@ -3,6 +3,7 @@ import sys
 sys.path.append('/pynjlp')
 
 from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
+from nlp.collection.trie.bintrie.HashCode import hash_code
 
 def createTinyDictionary():
     return {
@@ -17,3 +18,5 @@ if __name__ == '__main__':
 
     tinyDictionary = createTinyDictionary()
     db = DoubleArrayTrie(tinyDictionary)
+    #print(db.toString())
+
