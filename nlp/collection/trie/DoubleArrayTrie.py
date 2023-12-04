@@ -1,6 +1,8 @@
 from .bintrie.HashCode import hash_code, char_hash
+from .DoubleArrayTrieSearcher import Searcher, LongestSearcher
 
 class Node:
+    
     def __init__(self):
         self.c = ''
         self.code = 0
@@ -13,23 +15,25 @@ class Node:
 
 class DoubleArrayTrie:
 
+    check = []
+    base  = []
+
+    key = []
+    value = []
+    length = []
+
+    char = []
+    v = []
+
+    progress = 0
+    nextCheckPos = 0  # 下一次检查的位置
+
     def __init__(self, buildFrom, enableFastBuild = False):
-        self.check = []
-        self.base  = []
-
-        self.key = []
-        self.value = []
-        self.length = []
-
-        self.char = []
 
         self.size = 0
         self.keySize = 0
         self.allocSize = 0
         self.error = 0
-
-        self.progress = 0
-        self.nextCheckPos = 0  # 下一次检查的位置
 
         self.enableFastBuild = enableFastBuild 
 
@@ -57,7 +61,7 @@ class DoubleArrayTrie:
         """构建DAT，注意keys一定要进行字符排序，否则会构建失败"""
         assert keyValueMap != None
         keyValueList = [(k, keyValueMap[k]) for k in sorted(keyValueMap.keys())]
-
+        
         keys, values = [], []
         for key, val in keyValueList:
             if not key:
@@ -71,6 +75,8 @@ class DoubleArrayTrie:
     def build_items(self, keyList, valueList):
         assert len(keyList) == len(valueList), "键的个数与值的个数不一样！"
         assert len(keyList) > 0 , "键值个数为0！"
+        
+        self.v = valueList
 
         return self.build_keys(keyList, None, None, len(keyList))
 
@@ -89,7 +95,8 @@ class DoubleArrayTrie:
         self.key = _key
         self.length = _length
         self.keySize = _keySize
-       
+        self.value = _value
+
         # 32个双字节
         self.resize(65536 * 32)
 
@@ -164,8 +171,6 @@ class DoubleArrayTrie:
         
         #print('siblings====', [(s.c, s.code, s.left, s.right) for s in siblings])
         return siblings
-                
-
     
     def insert(self, siblings, used):
         """
@@ -185,7 +190,7 @@ class DoubleArrayTrie:
         if self.allocSize <= pos:
             self.resize(pos + 1)
         
-        print(f'====insert-Start====【pos = {pos}】 ==== 【char = {siblings[0].c}】===【code={siblings[0].code}】')
+        #print(f'====insert-Start====【pos = {pos}】 ==== 【char = {siblings[0].c}】===【code={siblings[0].code}】')
 
         """
         扩容策略
@@ -196,7 +201,7 @@ class DoubleArrayTrie:
             
             if self.allocSize <= pos:
                 self.resize(pos + 1)
-
+            
             if self.check[pos] != 0:
                 nonzero_num += 1
                 continue
@@ -218,14 +223,12 @@ class DoubleArrayTrie:
             
             # 这种循环方式是为了实现 java 中的 continue outer；当内循环正常终止，才终止外循环，否则继续外循环
             # 这句话的意思，如果找到了满足目标空闲空间，就跳出整个循环
-            for i in range(len(siblings)):
-                if self.check[begin + siblings[i].code] == 0:
+            for i in range(1, len(siblings)):
+                if self.check[begin + siblings[i].code] != 0:
                     break
             else:
-                continue
+                break
 
-            break
-        
         """
         启发式空闲搜索法
         从位置nextCheckPos开始到pos之间，如果占用率在95%以上，下次插入节点时，直接从pos位置开始查找 
@@ -244,9 +247,9 @@ class DoubleArrayTrie:
         for i in range(len(siblings)):
             self.check[begin + siblings[i].code] = begin
             self.char[begin + siblings[i].code] = siblings[i].c
-            print(f'====insert-Middle=【begin={begin}】【({i}), char={siblings[i].c} code={siblings[i].code}】【pos={pos}】')
+            #print(f'====insert-Middle=【begin={begin}】【({i}), char={siblings[i].c} code={siblings[i].code}】【pos={pos}】')
 
-        print('')
+        #print('')
         
         # 检查每个子节点, 若其没有孩子，就将它的base设置 -1，否则就调用 insert 建立关系 
         # 给 base 赋值，建立父节点 (base[begin + s.code]) 与子节点 (h) 的一对多的关系
@@ -287,7 +290,6 @@ class DoubleArrayTrie:
 
         self.char = nchar
 
-
     def toString(self):
         
         infoIndex   = "i    = "
@@ -311,6 +313,85 @@ class DoubleArrayTrie:
                 "\n" + infoBase + \
                 "\n" + infoCheck + "\n" + \
                 "}"
+    
+    def exactMatchSearch(self, keyChars, pos = 0, length = 0, nodePos = 0):
+        
+        if length == 0:
+            length = len(keyChars)
 
+        if nodePos <= 0:
+            nodePos = 0
+
+        result = -1
+
+        b = self.base[nodePos]
+        p = 0
+
+        for i in range(pos, length):
+            p = b + char_hash(keyChars[i]) + 1
+            if b == self.check[p]:
+                b = self.base[p]
+            else:
+                return result
+
+        p = b
+        n = self.base[p]
+        if b == self.check[p] and n < 0:
+            result = -n - 1
+
+        return result
+
+
+    def get(self, key):
+        """精确查找"""
+        index = self.exactMatchSearch(key)
+        if index >= 0:
+            return self.v[index]
+
+        return None
+
+    def parseText(self, txt):
+        searcher = Searcher(self, 0, txt)
+
+        wordList = []
+        while searcher.next():
+            
+            begin = searcher.begin
+            end = begin + searcher.length
+            #print(begin, end, searcher.value)
+
+            wordList.append(txt[begin:end])
+
+        return wordList
+
+    
+    def parseLongestText(self, txt):
+        searcher = LongestSearcher(self, 0, txt)
+        
+        wordList = []
+        while searcher.next():
+            begin = searcher.begin
+            end = begin + searcher.length
+            #print(begin, end, searcher.value)
+
+            wordList.append(txt[begin:end])
+
+        return wordList
+
+    def matchLongest(self, txt):
+        searcher = LongestSearcher(self, 0, txt)
+
+        wordNet = {}
+        while searcher.next():
+            wordNet[searcher.begin] = searcher.length
+        
+        print(wordNet)
+        termList, i = [], 0
+        while i < len(wordNet.keys()):
+
+            termList.append((i, wordNet[i]))
+            i += wordNet[i]
+
+        print(termList)
 
 
