@@ -358,7 +358,7 @@ class DoubleArrayTrie:
             
             begin = searcher.begin
             end = begin + searcher.length
-            #print(begin, end, searcher.value)
+            print(begin, end, searcher.value)
 
             wordList.append(txt[begin:end])
 
@@ -377,21 +377,5 @@ class DoubleArrayTrie:
             wordList.append(txt[begin:end])
 
         return wordList
-
-    def matchLongest(self, txt):
-        searcher = LongestSearcher(self, 0, txt)
-
-        wordNet = {}
-        while searcher.next():
-            wordNet[searcher.begin] = searcher.length
-        
-        print(wordNet)
-        termList, i = [], 0
-        while i < len(wordNet.keys()):
-
-            termList.append((i, wordNet[i]))
-            i += wordNet[i]
-
-        print(termList)
 
 

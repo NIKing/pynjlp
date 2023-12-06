@@ -128,11 +128,11 @@ class BinTrie(BaseNode):
 
         return word_list
 
-    def parseLongText(self, text):
+    def parseLongestText(self, text):
         """匹配长文本，根据字典返回最长匹配，比如'工'和'工信部'，返回'工信部'""" 
         i, text_len, word_list = 0, len(text), []
+        
         while i < text_len:
-
             state = self.transition(text[i])
             if state:
                 to  = i + 1

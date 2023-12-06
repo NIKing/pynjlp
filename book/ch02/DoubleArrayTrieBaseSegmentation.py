@@ -9,13 +9,13 @@ from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
 from nlp.collection.trie.bintrie.HashCode import hash_code
 
 def createTinyDictionary():
-    return {
-        "±": "w",
-        "三七开": "san qi kai",
-        "三三两两": "shan shan liang liang",
-        "上海": "shang hai",
-        "上海市": "shang hai shi",
-    }
+    #return {
+    #    "±": "w",
+    #    "三七开": "san qi kai",
+    #    "三三两两": "shan shan liang liang",
+    #    "上海": "shang hai",
+    #    "上海市": "shang hai shi",
+    #}
 
     return {
         "入口": "entry",
@@ -34,9 +34,9 @@ def test_1():
     dictionary = createTinyDictionary()
     dat = DoubleArrayTrie(dictionary)
     
-    print(dat.toString())
-    #print(dat.get('自然语言'))
-    print(dat.get('上海市'))
+    #print(dat.toString())
+    print(dat.parseText('自然语言处理'))
+    #print(dat.get('上海市'))
     #print(dat.get('三三两两'))
 
 def test_2():

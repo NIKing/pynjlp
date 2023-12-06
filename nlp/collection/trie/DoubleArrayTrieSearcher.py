@@ -52,7 +52,7 @@ class Searcher():
 
         while True:
             
-            # print(f'==【i={self.i}】==【arrayLength={self.arrayLength}】')
+            print(f'==【i={self.i}】==【arrayLength={self.arrayLength}】')
             # 指针到头，将起点向前挪一位，重新开始，状态归零
             if self.i == self.arrayLength:
                 self.begin += 1
@@ -73,8 +73,9 @@ class Searcher():
             else:
                 # 转移失败 起点向前挪一个，重新开始，状态归零
                 self.i = self.begin
+                print(f'???????【begin = {self.begin}】')
+
                 self.begin += 1
-                #print(f'???????【begin = {self.begin}】')
                 if self.begin == self.arrayLength:
                     break
 
@@ -86,20 +87,20 @@ class Searcher():
             p = b
             n = self.base[p]
             # base[p] == check[p] && base[p] < 0 查到一个词
-            #print('------', b, self.check[p], n)
+            print('------', b, self.check[p], n)
             if b == self.check[p] and n < 0:
                 self.length = self.i - self.begin + 1
-                self.index = -n - 1
-                self.value = self.v[self.index]
+                self.index  = -n - 1
+                self.value  = self.v[self.index]
                 
-                self.last  = b
+                self.last   = b
                 self.i += 1
 
                 return True
 
             self.i += 1
         
-        #print(f'最后i=【{self.i}】')
+        print(f'最后i=【{self.i}】')
         return False
 
 
@@ -135,7 +136,7 @@ class LongestSearcher():
         self.charArray = charArray
         self.arrayLength = len(charArray)
         
-        print(charArray, self.arrayLength, self.base[0])
+        #print(charArray, self.arrayLength, self.base[0])
         self.i = offset
         self.begin = offset
 
@@ -154,13 +155,13 @@ class LongestSearcher():
             
             # 状态转移 p = base[char[i-1]] + char[i] + 1  
             # 或者 p = base[b] + c，满足 base[b] = check[p]
-            print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
+            #print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
             p = b + char_hash(self.charArray[self.i]) + 1
-            print(f'<<<<<<<【b={b}】【p = {p}】【check[p]={self.check[p]}】')
+            #print(f'<<<<<<<【b={b}】【p = {p}】【check[p]={self.check[p]}】')
             
             if b == self.check[p]:
                 b = self.base[p] # 转移成功，沿着节点向下走
-                print(f'++++++转移成功【b = {b}】')
+                #print(f'++++++转移成功【b = {b}】')
                 
             else:
 
@@ -180,9 +181,7 @@ class LongestSearcher():
                 
                 # 状态归零
                 b = self.base[0]
-                print(f'-----转移失败【b={b}】【base={self.base[b]}】【check={self.check[b]}】')
-
-            print('')
+                #print(f'-----转移失败【b={b}】【base={self.base[b]}】【check={self.check[b]}】')
 
             p = b
             n = self.base[p]
