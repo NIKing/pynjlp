@@ -8,14 +8,16 @@ from nlp.collection.trie.DoubleArrayTrieSearcher import Searcher
 from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
 from nlp.collection.trie.bintrie.HashCode import hash_code
 
+from nlp.seg.other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
+
 def createTinyDictionary():
-    #return {
-    #    "±": "w",
-    #    "三七开": "san qi kai",
-    #    "三三两两": "shan shan liang liang",
-    #    "上海": "shang hai",
-    #    "上海市": "shang hai shi",
-    #}
+    return {
+        "±": "w",
+        "三七开": "san qi kai",
+        "三三两两": "shan shan liang liang",
+        "上海": "shang hai",
+        "上海市": "shang hai shi",
+    }
 
     return {
         "入口": "entry",
@@ -34,8 +36,9 @@ def test_1():
     dictionary = createTinyDictionary()
     dat = DoubleArrayTrie(dictionary)
     
-    #print(dat.toString())
-    print(dat.parseText('自然语言处理'))
+    print(dat.toString())
+    #print(dat.parseText('自然语言处理'))
+    #print(dat.parseLongestText('自然语言处理'))
     #print(dat.get('上海市'))
     #print(dat.get('三三两两'))
 
@@ -43,11 +46,11 @@ def test_2():
     dictionary = loadDictionary('/pynjlp/data/dictionary/CoreNatureDictionary.mini.txt')
     dat = DoubleArrayTrie(dictionary)
 
-    #text = '江西鄱阳湖干枯，中国最大淡水湖变成大草原'
+    text = '江西鄱阳湖干枯，中国最大淡水湖变成大草原'
     #res = dat.parseText(text)
 
-    text = '我变成大魔王'
-    text = '上海市虹口区大连西路550号SISU'
+    #text = '我变成大魔王'
+    #text = '上海市虹口区大连西路550号SISU'
     res = dat.parseLongestText(text)
     #res  = dat.matchLongest(text)
 
@@ -60,6 +63,14 @@ def test_3():
     print(dat.toString())
     #print(dat.get('上海市'))
 
+def test_4():
+    dictionary = loadDictionary('/pynjlp/data/dictionary/CoreNatureDictionary.mini.txt')
+    segment = DoubleArrayTrieSegment(dictionary)
+
+    text = '江西鄱阳湖干枯，中国最大淡水湖变成大草原'
+    res = segment.seg(text)
+    print(res)
+
 if __name__ == '__main__':
 
     arguments = sys.argv
@@ -71,6 +82,8 @@ if __name__ == '__main__':
         test_2()
     elif debug == '-3':
         test_3()
+    elif debug == '-4':
+        test_4()
 
 
     

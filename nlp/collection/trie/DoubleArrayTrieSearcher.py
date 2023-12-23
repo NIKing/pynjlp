@@ -65,9 +65,9 @@ class Searcher():
             
             # 转移状态 p = base[b] + c = base[char[i - 1]] + char[i] + 1
             # 转移成功 base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
-            #print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
+            print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
             p = b + char_hash(self.charArray[self.i]) + 1
-            #print(f'<<<<<<<【b={b}】【check[p]={self.check[p]}】【p = {p}】')
+            print(f'<<<<<<<【b={b}】【check[p]={self.check[p]}】【p = {p}】')
             if b == self.check[p]:
                 b = self.base[p]
             else:
@@ -93,7 +93,7 @@ class Searcher():
                 self.index  = -n - 1
                 self.value  = self.v[self.index]
                 
-                self.last   = b
+                self.last = b
                 self.i += 1
 
                 return True

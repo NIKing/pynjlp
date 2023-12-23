@@ -1,26 +1,20 @@
 import os
 
-def loadDictionary(path):
+def loadDictionary(path, splitter = '\t', defaultNature = None):
     if not path:
         return []
 
-    splitter, line_list = "\t", []
-    try:
-        with open(path, 'r', encoding='utf8') as f:
-            line_list = f.readlines()
-    except IOError as e:
-        print(f'读取失败:{e}')
-    
+    line_list = readlinesTxt(path)
     storage = {}
+
     for line in line_list:
-        
         param = line.rstrip('\n').split(splitter)
         
         # 每个关键词存在多组属性（以词性和词频为组），计算关键词存在特征总数
         natureCount = int((len(param) - 1) / 2)
         key = str(param[0])
         if natureCount == 0:
-            storage[key] = None
+            storage[key] = defaultNature
             continue
         
         nature, frequency, totalFrequency = [], [], 0
@@ -35,7 +29,7 @@ def loadDictionary(path):
 
 def readlinesTxt(filePath):
     if not filePath:
-        return
+        return []
     
     line_list = []
     try:

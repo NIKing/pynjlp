@@ -28,7 +28,7 @@ class DoubleArrayTrie:
     progress = 0
     nextCheckPos = 0  # 下一次检查的位置
 
-    def __init__(self, buildFrom, enableFastBuild = False):
+    def __init__(self, buildFrom = None, enableFastBuild = False):
 
         self.size = 0
         self.keySize = 0
@@ -37,8 +37,11 @@ class DoubleArrayTrie:
 
         self.enableFastBuild = enableFastBuild 
 
-        if self.build(buildFrom) != 0:
+        if buildFrom and self.build(buildFrom) != 0:
             print("构造失败")
+    
+    def getSize(self):
+        return self.size
 
     def resize(self, newSize):
         """拓展数组"""
@@ -248,8 +251,6 @@ class DoubleArrayTrie:
             self.check[begin + siblings[i].code] = begin
             self.char[begin + siblings[i].code] = siblings[i].c
             #print(f'====insert-Middle=【begin={begin}】【({i}), char={siblings[i].c} code={siblings[i].code}】【pos={pos}】')
-
-        #print('')
         
         # 检查每个子节点, 若其没有孩子，就将它的base设置 -1，否则就调用 insert 建立关系 
         # 给 base 赋值，建立父节点 (base[begin + s.code]) 与子节点 (h) 的一对多的关系
@@ -358,7 +359,9 @@ class DoubleArrayTrie:
             
             begin = searcher.begin
             end = begin + searcher.length
-            print(begin, end, searcher.value)
+            #print(begin, end, searcher.value)
+            print(f'--------{begin}----{end}-----{searcher.value}----------------------')
+            print(' ')
 
             wordList.append(txt[begin:end])
 
@@ -377,5 +380,8 @@ class DoubleArrayTrie:
             wordList.append(txt[begin:end])
 
         return wordList
+
+    def getLongestSearcher(self, txt, offset):
+        return LongestSearcher(self, offset, txt)
 
 
