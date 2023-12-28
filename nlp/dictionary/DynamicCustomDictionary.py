@@ -89,4 +89,5 @@ class DynamicCustomDictionary():
             return True
 
         self.trie.put(word, att)
+
         return True

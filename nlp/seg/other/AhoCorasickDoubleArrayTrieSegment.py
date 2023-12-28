@@ -6,8 +6,9 @@ from nlp.seg.DictionaryBasedSegment import DictionaryBasedSegment
 from nlp.seg.common.Term import Term
 
 from nlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie import AhoCorasickDoubleArrayTrie
+from nlp.corpus.io.IOUtil import loadDictionary
 
-class AhoCorasickDoubleArrayTrieSegment(DictionaryBaseSegment):
+class AhoCorasickDoubleArrayTrieSegment(DictionaryBasedSegment):
     
     trie = None
 
@@ -38,10 +39,10 @@ class AhoCorasickDoubleArrayTrieSegment(DictionaryBaseSegment):
         treeMap = {}
         try:
             for path in pathArray:
-                treeMap.update(loadDictionary(pathArray))
+                treeMap.update(loadDictionary(path))
         except Exception as e:
             print(f'加载字典失败：{e}')
-
+        
         if treeMap and len(treeMap.keys()) > 0:
             self.trie.build(treeMap)
             
@@ -55,14 +56,14 @@ class AhoCorasickDoubleArrayTrieSegment(DictionaryBaseSegment):
         natureArray = []
         wordNet = [1] * len(charArray)
 
-        searcher = self.trie.getSearcher(charArray, 0)
-        while(searcher.next()):
+        res = self.trie.parseText(charArray)
+        for r in res:
             #print(f'bbb--{searcher.begin}---{searcher.begin + searcher.length}')
-            wordNet[searcher.begin] = searcher.length
+            wordNet[r[0]] = r[1]
             
             # 词性标注- value 没有 natrue 可能会引起报错
             if self.config.speechTagging:
-                natureArray[searcher.begin] = searcher.value.natrue[0]
+                natureArray[r[0]] = 'n'
     
 
         termList = []

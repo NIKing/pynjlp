@@ -4,6 +4,8 @@ sys.path.append('/pynjlp')
 from nlp.corpus.io.IOUtil import loadDictionary
 from nlp.algorithm.ahocorasick.trie.Trie import Trie
 
+from nlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie import AhoCorasickDoubleArrayTrie
+from nlp.seg.other.AhoCorasickDoubleArrayTrieSegment import AhoCorasickDoubleArrayTrieSegment
 
 def test_1():
     keywords = ["hers", "his", "she", "he"]
@@ -26,7 +28,21 @@ def test_2():
     print(wordList)
 
 def test_3():
-    pass
+    keywords = ["hers", "his", "she", "he"]
+    treeMap = {}
+    for keyword in keywords:
+        treeMap[keyword] = keyword
+
+    res = AhoCorasickDoubleArrayTrie(treeMap).parseText('ushers')
+    print(res)
+
+def test_4():
+    dictionaryPaths = ['/pynjlp/data/dictionary/CoreNatureDictionary.mini.txt']
+    acdats = AhoCorasickDoubleArrayTrieSegment(dictionaryPaths)
+
+    res = acdats.seg('江西鄱阳湖干枯')
+    print(res)
+
 
 if __name__ == '__main__':
     arguments = sys.argv
@@ -38,5 +54,7 @@ if __name__ == '__main__':
         test_2()
     elif debug == '-3':
         test_3()
+    elif debug == '-4':
+        test_4()
 
 

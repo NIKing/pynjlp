@@ -1,9 +1,10 @@
 from collections import deque
 from abc import ABC, abstractmethod
 
-from numpy as np
+from nlp.collection.AhoCorasick.State import State
+from nlp.collection.trie.bintrie.HashCode import char_hash
 
-from nlp.colletion.AhoCorasick.State import State
+import numpy as np
 
 class Builder(ABC):
     """构建工具"""
@@ -46,19 +47,30 @@ class Builder(ABC):
     
     # 每个key的长度
     l = []
+    
+    def __int__(self):
+        pass
 
-    def build(self, treeMap):
+    def builder(self, treeMap):
         """treeMap是排序好"""
         assert treeMap != None
-        treeMap = [(k, treeMap[k]) for k in sorted(treeMap.keys())]
+        keyValueList = [(k, treeMap[k]) for k in sorted(treeMap.keys())]
         
+        keys, values = [], []
+        for key, val in keyValueList:
+            if not key:
+                continue
+
+            keys.append(key)
+            values.append(val)
+
         # 保存value
-        self.v = treeMap.values()
+        self.v = values
         
         # 每个key的长度
-        self.l = len(self.v)
+        self.l = [0] * len(self.v)
 
-        keySet = treeMap.keys()
+        keySet = keys
 
         # 构建二分树, 普通字典树
         self.addAllKeyword(keySet)
@@ -106,7 +118,7 @@ class Builder(ABC):
             self.insert(siblings)
     
     @abstractmethod
-    def fetch(self, parnt, siblings):
+    def fetch(self, parnt):
         pass
 
     def insert(self, siblings):
@@ -182,13 +194,12 @@ class Builder(ABC):
         # check的对应位置是：字符hash值 + 1 ，其赋的值是：上一个字符的位置(父节点)，初始等于1
         for i in range(len(siblings)):
             self.check[begin + siblings[i][0]] = begin
-            self.char[begin + siblings[i][0]] = siblings[i].c
-            #print(f'====insert-Middle=【begin={begin}】【({i}), char={siblings[i].c} code={siblings[i][0]}】【pos={pos}】')
+            #print(f'====insert-Middle=【begin={begin}】【({i}), code={siblings[i][0]}】【pos={pos}】')
         
         # 检查每个子节点, 若其没有孩子，就将它的base设置 -1，否则就调用 insert 建立关系 
         # 给 base 赋值，建立父节点 (base[begin + s.code]) 与子节点 (h) 的一对多的关系
         for i in range(len(siblings)):
-            new_siblings = self.fetch(siblings[i])
+            new_siblings = self.fetch(siblings[i][1])
             
             # 一个词的终止且不为其他词的前缀
             if len(new_siblings) == 0:
@@ -207,8 +218,9 @@ class Builder(ABC):
     def constructFailureStates(self):
         """建立failure表"""
         self.fail = [0] * (self.size + 1)
-        self.output = np.zeors((self.size, 1))
-        
+        self.output = [0] * (self.size + 1)
+        #self.output = [[0] * (self.size + 1) for _ in range((self.size + 1))]
+
         queue = deque()
 
         # 第一步，将深度为1的节点的failure设为根节点
@@ -234,7 +246,7 @@ class Builder(ABC):
                 
                 newFailureState = traceFailureState.nextState(transition)
                 targetState.setFailure(newFailureState, self.fail)
-                targetState.addEmit(newFailureState.emit())
+                targetState.addEmit(newFailureState.getEmit())
 
                 self.constructOutput(targetState)
     
@@ -243,29 +255,29 @@ class Builder(ABC):
         emit = targetState.getEmit()
         if emit == None or len(emit) <= 0:
             return
-
+        
+        #print(emit)
         output = [0] * len(emit)
         for i, it in enumerate(emit):
             output[i] = it
-
+        
+        #print(self.output)
+        #print(output)
         self.output[targetState.getIndex()] = output
 
     def resize(self, newSize):
         """拓展数组"""
         base2  = [0] * newSize
         check2 = [0] * newSize
-        char2  = [0] * newSize
         used2  = [False] * newSize
 
         if self.allocSize > 0:
             base2   = self.base[:self.allocSize]
             check2  = self.check[:self.allocSize]
-            char2   = self.char[:self.allocSize]
             used2   = self.used[:self.allocSize]
         
         self.base  = base2
         self.check = check2
-        self.char  = char2
         self.used  = used2
         
         self.allocSize = newSize
@@ -287,21 +299,28 @@ class AhoCorasickDoubleArrayTrie(Builder):
 
     enableFastBuild = False
 
-    def __init__(self, dictionary, enableFastBuild):
+    def __init__(self, dictionary = None, enableFastBuild = False):
+        Builder.__init__(self)
+
         self.enableFastBuild = enableFastBuild
-        self.build(dictionary)
+
+        if dictionary:
+            self.build(dictionary)
+
+    def build(self, dictionary):
+        self.builder(dictionary)
     
     def parseText(self, text):
-        currentState, collectedEmits = 0, []
-        for i in len(text):
-            currentState  = self.getState(currentState, text[i])
-            collecedEmits = self.storeEmits(i + 1, currentState)
+        position, currentState, collectedEmits = 1, 0, []
+        for t in text:
+            currentState  = self.getState(currentState, t)
+            emits = self.storeEmits(position, currentState)
+            collectedEmits.extend(emits)
+            
+            position += 1
 
         return collectedEmits
-
-    def build(self, treeMap):
-        Build().build(treeMap)
-
+    
     def fetch(self, parent) -> list:
         """
         获取直接相连的子节点
@@ -312,13 +331,13 @@ class AhoCorasickDoubleArrayTrie(Builder):
         if parent.isAcceptable():
             # 此节点是parent的子节点，同时具备parent的输出
             fakeNode = State(-(parent.getDepth() + 1))
-            fakeNode.addEmit(parent.getLargesValueId())
+            fakeNode.addEmit(parent.getLargestValueId())
 
-            siblings.add((0, fakeNode))
+            siblings.append((0, fakeNode))
             
         # entry.getKey() 应该是字符才对，在这里进行运算操作，实际上是对该字符Unicode进行运算
-        for entry in parent.getSuccess():
-            siblings.add((entry.getKey() + 1, entry.getValue()))
+        for key, value in parent.getSuccess().items():
+            siblings.append((char_hash(key) + 1, value))
 
         return siblings
     
@@ -342,9 +361,9 @@ class AhoCorasickDoubleArrayTrie(Builder):
 
         return collectedEmits
 
-    def transitionWithroot(self, _from, c):
+    def transitionWithRoot(self, _from, c):
         b = self.base[_from]
-        p = b + c + 1
+        p = b + char_hash(c) + 1
 
         if b != self.check[p]:
             if _from == 0:

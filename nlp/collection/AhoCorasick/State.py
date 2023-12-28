@@ -18,6 +18,9 @@ class State():
     
     # goto 表，也称转移函数。根据字符串的下一个字符转移到下一个状态
     success = None
+    
+    # 在双数组中的对应下标
+    index = 0
 
     def __init__(self, depth = 0):
         self.depth = depth
@@ -98,7 +101,7 @@ class State():
     def setIndex(self, index):
         self.index = index
 
-    def getIndex(self, index):
+    def getIndex(self):
         return self.index
 
     def toString(self):
