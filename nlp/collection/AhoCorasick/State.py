@@ -91,12 +91,12 @@ class State():
         """获取failure状态"""
         return self.failure
 
-    def setFailure(self, failState, fail):
+    def setFailure(self, failState):
         """设置failure状态"""
         self.failure = failState
         
         # 传递回去, 这是和 algorithm.State 不同的地方
-        fail[self.index] = self.failure.index
+        #fail[self.index] = self.failure.index
     
     def setIndex(self, index):
         self.index = index

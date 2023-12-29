@@ -28,7 +28,7 @@ class Trie():
         currentState = self.rootState
         for character in keyword:
             currentState = currentState.addState(character)
-                    
+        
         # 构建 output 表，保存结束字符的模式串
         currentState.addEmit(keyword)
 
@@ -132,6 +132,8 @@ class Trie():
                 newFailureState = traceFailureState.nextState(transition)
                 targetState.setFailure(newFailureState)
                 targetState.addEmit(newFailureState.emit())
+
+            print(currentState.toString())
     
     def storeEmits(self, position, currentState) -> list:
         """

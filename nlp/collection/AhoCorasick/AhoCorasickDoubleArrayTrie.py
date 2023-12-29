@@ -52,7 +52,7 @@ class Builder(ABC):
         pass
 
     def builder(self, treeMap):
-        """treeMap是排序好"""
+        """treeMap是排序好的字典序"""
         assert treeMap != None
         keyValueList = [(k, treeMap[k]) for k in sorted(treeMap.keys())]
         
@@ -245,8 +245,11 @@ class Builder(ABC):
                     traceFailureState = traceFailureState.getFailure()
                 
                 newFailureState = traceFailureState.nextState(transition)
-                targetState.setFailure(newFailureState, self.fail)
+                targetState.setFailure(newFailureState)
                 targetState.addEmit(newFailureState.getEmit())
+                
+                # fail表存储状态下标
+                self.fail[targetState.index] = targetState.failure.index
 
                 self.constructOutput(targetState)
     
@@ -335,7 +338,7 @@ class AhoCorasickDoubleArrayTrie(Builder):
 
             siblings.append((0, fakeNode))
             
-        # entry.getKey() 应该是字符才对，在这里进行运算操作，实际上是对该字符Unicode进行运算
+        # 在java源代码中entry.getKey() 应该是字符才对，在这里（python）进行运算操作，实际上是对该字符Unicode进行运算
         for key, value in parent.getSuccess().items():
             siblings.append((char_hash(key) + 1, value))
 

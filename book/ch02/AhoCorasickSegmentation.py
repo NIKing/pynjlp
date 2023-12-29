@@ -9,11 +9,14 @@ from nlp.seg.other.AhoCorasickDoubleArrayTrieSegment import AhoCorasickDoubleArr
 
 def test_1():
     keywords = ["hers", "his", "she", "he"]
+    #keywords = sorted(keywords)
+
+    print(keywords)
     trie = Trie(keywords)
 
     for emit in trie.parseText('ushers'):
         print(emit[0], emit[1], emit[2])
-
+    
 def test_2():
     dictionary = loadDictionary('/pynjlp/data/dictionary/CoreNatureDictionary.mini.txt')
     dictionary_keys = list(dictionary.keys())
