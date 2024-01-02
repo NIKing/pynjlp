@@ -2,6 +2,9 @@ class NLPConfig:
     
     # 核心词典路径
     CoreDictionaryPath = 'data/dictionary/CoreNatureDictionary.txt'
+    
+    # 二元语法词典路径
+    BiGramDictionaryPath = "data/dictionary/CoreNatureDictionary.ngram.txt"
 
     # 用户自定义词典路径
     CustomDictionaryPath = ['/pynjlp/data/dictionary/custom/CustomDictionary.txt']

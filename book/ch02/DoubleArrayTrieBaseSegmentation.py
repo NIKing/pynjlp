@@ -71,6 +71,22 @@ def test_4():
     res = segment.seg(text)
     print(res)
 
+def test_5():
+    dictionary = loadDictionary('/pynjlp/data/test/my_cws_model.txt', " ")
+    segment = DoubleArrayTrieSegment(dictionary)
+
+    text = '商品和服务'
+    res = segment.seg(text)
+    print(res)
+
+def test_6():
+    dictionary = loadDictionary('/pynjlp/data/test/my_cws_model.txt', " ")
+    dat = DoubleArrayTrie(dictionary)
+
+    text = '商品和服务'
+    res = dat.parseText(text)
+    print(res)
+
 if __name__ == '__main__':
 
     arguments = sys.argv
@@ -84,6 +100,10 @@ if __name__ == '__main__':
         test_3()
     elif debug == '-4':
         test_4()
+    elif debug == '-5':
+        test_5()
+    elif debug == '-6':
+        test_6()
 
 
     

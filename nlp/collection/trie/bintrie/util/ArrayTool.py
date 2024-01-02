@@ -18,7 +18,7 @@ def binarySearch(branches, c):
 
     low = 0
     while low <= high:
-        #mid = (low + high) >>> 1
+        # mid = (low + high) >>> 1
         # // 整数除法运算，结果只会是整数部分
         mid = (low + high) // 2
         cmp = branches[mid].compareTo(c)

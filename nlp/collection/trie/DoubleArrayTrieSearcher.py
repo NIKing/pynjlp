@@ -52,7 +52,7 @@ class Searcher():
 
         while True:
             
-            print(f'==【i={self.i}】==【arrayLength={self.arrayLength}】')
+            #print(f'==【i={self.i}】==【arrayLength={self.arrayLength}】')
             # 指针到头，将起点向前挪一位，重新开始，状态归零
             if self.i == self.arrayLength:
                 self.begin += 1
@@ -65,16 +65,16 @@ class Searcher():
             
             # 转移状态 p = base[b] + c = base[char[i - 1]] + char[i] + 1
             # 转移成功 base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
-            print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
+            #print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
             p = b + char_hash(self.charArray[self.i]) + 1
-            print(f'<<<<<<<【b={b}】【check[p]={self.check[p]}】【p = {p}】')
+            #print(f'<<<<<<<【b={b}】【check[p]={self.check[p]}】【p = {p}】')
             if b == self.check[p]:
                 b = self.base[p]
             else:
                 # 转移失败 起点向前挪一个，重新开始，状态归零
-                self.i = self.begin
-                print(f'???????【begin = {self.begin}】')
-
+                # 2024年1月1日，添加了“+1 ”操作，当转移失败，需要从第二个字符开始扫描，不能从头开始
+                self.i = self.begin + 1
+                
                 self.begin += 1
                 if self.begin == self.arrayLength:
                     break
@@ -86,8 +86,8 @@ class Searcher():
             
             p = b
             n = self.base[p]
-            # base[p] == check[p] && base[p] < 0 查到一个词
-            print('------', b, self.check[p], n)
+            #print('------', b, self.check[p], n)
+            # 判断是否是终止节点
             if b == self.check[p] and n < 0:
                 self.length = self.i - self.begin + 1
                 self.index  = -n - 1
@@ -95,12 +95,13 @@ class Searcher():
                 
                 self.last = b
                 self.i += 1
-
+                
+                #print(' ')
                 return True
 
             self.i += 1
         
-        print(f'最后i=【{self.i}】')
+        #print(f'最后i=【{self.i}】')
         return False
 
 

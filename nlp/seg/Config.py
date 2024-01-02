@@ -8,3 +8,24 @@ class Config():
     
     # 词性标注
     speechTagging = False
+
+    # 是否识别中国人名
+    nameRecognize = True
+
+    # 是否识别音译人名
+    translatedNameRecognize = True
+
+    # 是否识别日本人名
+    japaneseNameRecognize = False
+
+    # 是否识别地名
+    placeRecognize = False
+
+    # 是否识别机构
+    organizationRecognize = False
+
+    # 命名实体识别是否至少有一项被激活
+    ner = True
+
+    def updateNerConfig(self):
+        self.ner = self.nameRecognize or self.translatedNameRecognize or self.japaneseNameRecognize or self.placeRecognize or self.organizationRecognize

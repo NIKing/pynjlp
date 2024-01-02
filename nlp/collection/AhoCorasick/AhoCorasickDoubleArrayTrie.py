@@ -249,7 +249,7 @@ class Builder(ABC):
                 targetState.addEmit(newFailureState.getEmit())
                 
                 # fail表存储状态下标
-                self.fail[targetState.index] = targetState.failure.index
+                self.fail[targetState.getIndex()] = newFailureState.getIndex()
 
                 self.constructOutput(targetState)
     

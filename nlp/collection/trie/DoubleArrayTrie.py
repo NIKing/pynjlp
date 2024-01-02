@@ -14,7 +14,6 @@ class Node:
         return "Node{ code="+ self.code +" ,depth="+ self.depth +",left="+ self.left +",right="+ self.right +"}"
 
 class DoubleArrayTrie:
-
     check = []
     base  = []
 
@@ -292,7 +291,6 @@ class DoubleArrayTrie:
         self.char = nchar
 
     def toString(self):
-        
         infoIndex   = "i    = "
         infoChar    = "char = "
         infoBase    = "base = "
@@ -316,7 +314,7 @@ class DoubleArrayTrie:
                 "}"
     
     def exactMatchSearch(self, keyChars, pos = 0, length = 0, nodePos = 0):
-        
+        """精确匹配"""
         if length == 0:
             length = len(keyChars)
 
@@ -334,7 +332,8 @@ class DoubleArrayTrie:
                 b = self.base[p]
             else:
                 return result
-
+        
+        # 走到这里，说明 keyChars 在字典中是一个完整的字符串
         p = b
         n = self.base[p]
         if b == self.check[p] and n < 0:
@@ -360,8 +359,8 @@ class DoubleArrayTrie:
             begin = searcher.begin
             end = begin + searcher.length
             #print(begin, end, searcher.value)
-            print(f'--------{begin}----{end}-----{searcher.value}----------------------')
-            print(' ')
+            #print(f'--------{begin}----{end}-----{searcher.value}----------------------')
+            #print(' ')
 
             wordList.append(txt[begin:end])
 
@@ -383,5 +382,8 @@ class DoubleArrayTrie:
 
     def getLongestSearcher(self, txt, offset):
         return LongestSearcher(self, offset, txt)
+
+    def getSearcher(self, txt, offset):
+        return Searcher(self, offset, txt)
 
 

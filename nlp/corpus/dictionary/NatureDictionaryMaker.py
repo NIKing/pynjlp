@@ -3,7 +3,7 @@ sys.path.append('/pynjlp')
 
 from nlp.corpus.dictionary.CommonDictionaryMaker import CommonDictionaryMaker
 
-from nlp.utility.Perdefine import Perdefine 
+from nlp.utility.Predefine import Predefine 
 from nlp.corpus.tag.Nature import Nature
 
 from nlp.corpus.document.sentence.word.Word import Word
@@ -19,8 +19,8 @@ class NatureDictionaryMaker(CommonDictionaryMaker):
         
         new_sentence_list = []
         for i, sentence in enumerate(self.sentenceList):
-            sentence.insert(0, Word(Perdefine.TAG_BEGIN, Nature.begin))
-            sentence.append(Word(Perdefine.TAG_END, Nature.end))
+            sentence.insert(0, Word(Predefine.TAG_BEGIN, Nature.begin))
+            sentence.append(Word(Predefine.TAG_END, Nature.end))
 
             new_sentence_list.append(sentence)
         

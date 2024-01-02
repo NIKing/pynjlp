@@ -1,6 +1,6 @@
-import sys
-import os
-sys.path.append('/pynjlp')
+#import sys
+#import os
+#sys.path.append('/pynjlp')
 
 from nlp.corpus.io.IOUtil import getFileList
 from nlp.corpus.document.Document import Document
@@ -9,7 +9,6 @@ from nlp.corpus.document.sentence.Sentence import Sentence
 class CorpusLoader():
     def __init__(self):
         pass
-    
 
     @staticmethod
     def convert2DocumentList(folderPath):

@@ -5,7 +5,7 @@ from nlp.corpus.io.IOUtil import loadDictionary
 
 from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
 
-class Attribuite():
+class Attribute():
     
     # 词性列表
     nature = []
@@ -16,14 +16,18 @@ class Attribuite():
     # 词性总数
     totalFrequency = 0
 
-    def __init__(self, nature, frequency, totalFrequency):
-        self.nature = natrue
-        self.frequency = frequency
-        self.totalFrequency = totalFrequency
+    def __init__(self, nature, frequency, totalFrequency = 0):
+        if not isinstance(nature, list):
+            self.nature.append(nature)
+            self.frequency.append(frequency)
+            self.totalFrequency = frequency
+        else:
+            self.nature = natrue
+            self.frequency = frequency
+            self.totalFrequency = totalFrequency
 
     @staticmethod
     def create(natureWithFrequency):
-        
         try:
             params = natureWithFrequency.split(" ")
             if len(params) % 2 != 0:
@@ -44,13 +48,13 @@ class Attribuite():
         return None
 
 class CoreDictionary():
+    """使用DoubleArrayTrie实现的核心词典"""
 
     trie = DoubleArrayTrie()
+
     path = NLPConfig.CoreDictionaryPath
-
+    
     def __init__(self):
-
-        # 自动加载词典
         self.load(self.path)
 
     def load(self, path) -> bool:
@@ -59,12 +63,24 @@ class CoreDictionary():
             return False
 
         try:
-            treeMap = loadDictionary(path, defaultNature = Nature.n)
+            treeMap = loadDictionary(path, splitter = ' ',  defaultNature = Nature.n)
             self.trie.build(treeMap)
-
+            print(f'核心词典 {path} 加载成功')
         except Exception as e:
-            print(f'核心词典{path}加载失败！{e}')
+            print(f'核心词典 {path} 加载失败！{e}')
 
         return True
+
+    def reload(self):
+        path = NLPConfig.CoreDictionaryPath
+        return self.load(path)
     
+    @staticmethod
+    def getWordID(a):
+        """
+        获取词语的ID
+        -param a 词语
+        return ID，如果不存在，则返回 -1
+        """
+        return CoreDictionary.trie.exactMatchSearch(a)
 
