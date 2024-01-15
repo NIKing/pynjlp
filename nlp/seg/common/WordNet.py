@@ -9,6 +9,7 @@ from nlp.dictionary.CoreDictionary import CoreDictionary, Attribute
 from nlp.utility.Predefine import Predefine
 from nlp.utility.MathUtility import MathUtility
 
+"""词网构建器"""
 class WordNet():
     
     # 节点，每一行都是前缀词，跟图的表示方式不同
@@ -97,10 +98,8 @@ class WordNet():
         return self.vertexes
 
     def getVertexesLineFirst(self):
-        """获取顶点数组(实际上，就是展开二维数组)，按行优先列次之的顺序构造的顶点数组返回"""
-        
-        vertexes = []
-        i = 0
+        """获取顶点数组(实际上，就是展开二维数组变成一维数组)，按行优先列次之的顺序构造的顶点数组返回"""
+        vertexes, i = [], 0
         for vertexList in self.vertexes:
             for vertex in vertexList:
                 vertex.index = i
@@ -121,17 +120,21 @@ class WordNet():
 
 
     def toGraph(self):
-        """词网转词图"""
+        """
+        词网转词图
+        按照行索引构建词图，有个很好的性质，那就是第 i 行的词语 w 与 第 i + len(w) 行的所有词语相连，都能构成二元语法模型，所以，下面的 ??? 就得到了解答 
+        """
         graph = Graph(self.getVertexesLineFirst())
-
+        
+        # 找到前后两个顶点，并进行连接
         for row in range(len(self.vertexes) - 1):
             vertexListFrom = self.vertexes[row]
 
             for _from in vertexListFrom:
                 assert len(_from.realWord) > 0, "空节点会导致死循环"
-                toIndex = row + len(_from.realWord)
-
-                for to in self.vertexes[toIndex]:
-                    graph.connect(_from.index, to.index, MathUtility.calculateWeight(_from, to))
+                toIndex = row + len(_from.realWord) # 下一个顶点的位置，是第一个节点位置+字符长度？？？
+                
+                for _to in self.vertexes[toIndex]:
+                    graph.connect(_from.index, _to.index, MathUtility.calculateWeight(_from, _to))
 
         return graph

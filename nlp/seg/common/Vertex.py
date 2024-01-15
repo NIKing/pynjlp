@@ -5,10 +5,10 @@ from nlp.corpus.tag.Nature import Nature
 class Vertex():
 
     # 节点对应的词或等效词（如未##数）
-    word = ""
+    word = " "
     
     # 节点对应的真实词，绝对不含##
-    realWord = ""
+    realWord = " "
     
     # 词的属性，谨慎修改属性内部的数据，因为会影响到字典<br>
     attribute = None
@@ -27,13 +27,12 @@ class Vertex():
 
     def __init__(self, word, realWord, attribute, wordID = -1):
         if not attribute:
-            attribuite = Attribute(Natrue.n, 1)
+            attribute = Attribute(Nature.n, 1)
 
         self.wordID = wordID
         self.attribute = attribute
         
-        print(f'word={word}, realword={realWord}, {attribute}, {wordID}')
-
+        #print(f'word={word}, realword={realWord}, {attribute}, {wordID}')
         if not word:
             word = self.compileRealWord(realWord, attribute)
 
@@ -66,8 +65,11 @@ class Vertex():
         wordId = CoreDictionary.getWordID(Predefine.TAG_END)
         return Vertex(Predefine.TAG_END, " ", Attribute(Nature.end, Predefine.TOTAL_FREQUENCY / 10), wordId)
 
+    
+    def guessNature(self):
+        return self.attribute.nature[0]
 
     def toString(self):
-        return self.realWord
+        return self.realWord if self.realWord != ' ' else self.word
     
 

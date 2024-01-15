@@ -7,7 +7,6 @@ from nlp.dictionary.CoreDictionary import CoreDictionary
 
 class CoreBiGramTableDictionary():
     """核心词典的二元接续词典，采用整型储存，高性能"""
-    
     coreDictionary = CoreDictionary() 
 
     # 描述了词在pair中的范围，给定一个词idA，从pair[start[idA]]开始的start[idA + 1] - start[idA]描述了一些接续的频次
@@ -20,8 +19,11 @@ class CoreBiGramTableDictionary():
 
     def __init__(self):
         self.load(self.path)
+    
+    @staticmethod
+    def load(path):
+        self = CoreBiGramTableDictionary
 
-    def load(self, path):
         treeMap = {}
         try:
             lines = readlinesTxt(path)
@@ -90,25 +92,30 @@ class CoreBiGramTableDictionary():
             return False
 
         return True
+    
+    @staticmethod
+    def reload():
+        self = CoreBiGramTableDictionary
 
-    def reload(self):
-        self.coreDictionary.reload()
+        #self.coreDictionary.reload()
 
         path = NLPConfig.BiGramDictionaryPath
         return self.load(path)
     
-    def getBiFrequency(self, a, b):
+    @staticmethod
+    def getBiFrequency(a, b):
         """
         获取共现频次
         -param a 第一个词
         -param b 第二个词
         return 第一个词@第二个词出现的频次
         """
-        
+        self = CoreBiGramTableDictionary
+
         if isinstance(a, int):
             idA = -1 if a < 0 else a
         else:
-            idA = self.coreDictionary.trie.exactMatchSearch(a)
+            idA = CoreBiGramTableDictionary.coreDictionary.trie.exactMatchSearch(a)
 
         if idA < 0:
             return 0
@@ -117,14 +124,14 @@ class CoreBiGramTableDictionary():
         if isinstance(b, int):
             idB = -1 if b < 0 else b
         else:
-            idB = self.coreDictionary.trie.exactMatchSearch(b)
+            idB = CoreBiGramTableDictionary.coreDictionary.trie.exactMatchSearch(b)
 
         if idB < 0:
             return 0
         
-        print(self.start)
-        print(a, idA)
-        print(b, idB)
+        print('--', self.start[:12])
+        print('--', a, idA)
+        print('--', b, idB)
         
         # 在 [self.start[idA], self.start[idA + 1] - self.start[idA]] 区间内使用二分法查找第二单词编号
         # 之所以需要使用区间查询，是因为在pair中存放的第二单词会是重复的，比如“商品@和”以及“服务@和”第一单词不同但是第二单词相同。

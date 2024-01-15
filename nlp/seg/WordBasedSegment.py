@@ -1,7 +1,7 @@
 from nlp.seg.Segment import Segment
 from nlp.seg.common.Vertex import Vertex
 
-from nlp.dictionary.CoreDictionary import CoreDictionary
+from nlp.dictionary.CoreDictionary import CoreDictionary, Attribute
 
 class WordBasedSegment(Segment):
     """基于词语NGram模型的分词器基类"""
@@ -10,15 +10,15 @@ class WordBasedSegment(Segment):
         super().__init__()
     
     def generateWordNet(self, wordNetStorage):
-        """生成一元词网, 根据一元模型生成词网"""
+        """生成一元词网, 根据一元模型生成词网，根据对句子进行全切分生存"""
 
-        # 通过字典树切分句子，得到句子中所有单词
+        # 通过字典树切分句子，得到句子中所有单词 —完全切分
         charArray = wordNetStorage.charArray
         searcher = CoreDictionary.trie.getSearcher(charArray, 0)
         while searcher.next():
             # 从 +1 开始，因为词网前后是开始和结尾标记
             word = ''.join(charArray[searcher.begin:searcher.begin + searcher.length])
-            wordNetStorage.add(searcher.begin + 1, Vertex("", word, searcher.value, searcher.index))
+            wordNetStorage.add(searcher.begin + 1, Vertex(" ", word, Attribute(**searcher.value), searcher.index))
         
         # 原子分词，保证图连通
         vertexes = wordNetStorage.getVertexes()
@@ -38,8 +38,6 @@ class WordBasedSegment(Segment):
                 i = j
             else:
                 i += len(vertexes[i][-1].realWord)
-
-        print(wordNetStorage.toString())
 
     @staticmethod
     def generateBiGraph(wordNet):

@@ -39,21 +39,19 @@ def test_2():
     NLPConfig.BiGramDictionaryPath = msr_model + '.ngram.txt'
     
     # 一元模型加载
-    #coreDictionary = CoreDictionary()
-    #coreDictionary.reload()
+    CoreDictionary.reload()
     
     # n元模型加载
-    coreBiGramTableDictionary = CoreBiGramTableDictionary()
-    coreBiGramTableDictionary.reload()
+    CoreBiGramTableDictionary.reload()
 
     #print(f'【商品】的频次：{coreDictionary.getTermFrequency()}')
-    print(f"【商品@和】的频次：{coreBiGramTableDictionary.getBiFrequency('商品', '和')}")
+    print(f"【商品@和】的频次：{CoreBiGramTableDictionary.getBiFrequency('商品', '和')}")
     
     # 最短路径分词
     segment = DijkstraSegment().enableAllNameEntityRecognize(False)
     res = segment.seg('商品和服务')
 
-    #print(res)
+    print(res)
 
 def test_3():
     NLPConfig.CoreDictionaryPath = msr_model + '.txt'

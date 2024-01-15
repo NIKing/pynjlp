@@ -78,34 +78,36 @@ class Segment(ABC):
         -param offsetEnabled 是否计算offset
         """
         assert vertexList != None
-        assert vertexList.size() >= 2, "这条路径不应当短于2" + vertexList.toString()
+        assert len(vertexList) >= 2, "这条路径不应当短于2"
 
-        length = vertexList.size() - 2
-        iterator = vertexList.iterator()
-        iterator.next()
+        length = len(vertexList) - 2
+        iterator = iter(vertexList)
         
+        # 第一个不要, 它是“始#始”
+        vertex = next(iterator)
+
         resultList = []
         if offsetEnabled:
             offset = 0
             for i in range(length):
-                vertex = iterator.next()
-                term = segment.vertexConvertTerm(vertex)
+                vertex = next(iterator)
+                
+                term = Segment.vertexConvertTerm(vertex)
                 term.offset = offset
 
                 offset += term.length()
                 resultList.append(term)
-
         else:
             for i in range(length):
-                vertex = iterator.next()
+                vertex = next(iterator)
+                
                 term = Segment.vertexConvertTerm(vertex)
-
                 resultList.append(term)
 
         return resultList
 
     
     @staticmethod
-    def vertexConertTerm(self, vertex):
+    def vertexConvertTerm(vertex):
         """将节点转换term"""
         return Term(vertex.realWord, vertex.guessNature())

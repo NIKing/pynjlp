@@ -50,3 +50,9 @@ class Predefine:
     
     # 二进制文件后缀
     BIN_EXT = ".bin"
+    
+    @staticmethod
+    def setTotalFrequency(totalFrequency):
+        Predefine.TOTAL_FREQUENCY = totalFrequency
+        Predefine.myu = 1 - ( 1 / totalFrequency + 0.00001 )
+        Predefine.OOV_DEFAULT_FREQUENCY = max(1, min(Predefine.OOV_DEFAULT_FREQUENCY / 100, totalFrequency))

@@ -26,6 +26,9 @@ class Config():
 
     # 命名实体识别是否至少有一项被激活
     ner = True
+    
+    #是否计算偏移量
+    offset = False
 
     def updateNerConfig(self):
         self.ner = self.nameRecognize or self.translatedNameRecognize or self.japaneseNameRecognize or self.placeRecognize or self.organizationRecognize

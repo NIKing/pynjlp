@@ -4,6 +4,9 @@ from nlp.corpus.tag.Nature import Nature
 from nlp.corpus.io.IOUtil import loadDictionary 
 
 from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
+from nlp.utility.Predefine import Predefine
+
+import traceback
 
 class Attribute():
     
@@ -22,7 +25,7 @@ class Attribute():
             self.frequency.append(frequency)
             self.totalFrequency = frequency
         else:
-            self.nature = natrue
+            self.nature = nature
             self.frequency = frequency
             self.totalFrequency = totalFrequency
 
@@ -56,24 +59,32 @@ class CoreDictionary():
     
     def __init__(self):
         self.load(self.path)
-
-    def load(self, path) -> bool:
+    
+    @staticmethod
+    def load(path) -> bool:
         """加载指定路径的词典"""
         if not path:
             return False
 
         try:
             treeMap = loadDictionary(path, splitter = ' ',  defaultNature = Nature.n)
-            self.trie.build(treeMap)
+            CoreDictionary.trie.build(treeMap)
+            
+            # 设置预定义-词典总频次
+            totalFrequency = sum([item['totalFrequency'] for item in treeMap.values()])
+            Predefine.setTotalFrequency(totalFrequency)
+
             print(f'核心词典 {path} 加载成功')
         except Exception as e:
             print(f'核心词典 {path} 加载失败！{e}')
+            #traceback.print_exc()
 
         return True
-
-    def reload(self):
+    
+    @staticmethod
+    def reload():
         path = NLPConfig.CoreDictionaryPath
-        return self.load(path)
+        return CoreDictionary.load(path)
     
     @staticmethod
     def getWordID(a):
