@@ -52,7 +52,6 @@ class Attribute():
 
 class CoreDictionary():
     """使用DoubleArrayTrie实现的核心词典"""
-
     trie = DoubleArrayTrie()
 
     path = NLPConfig.CoreDictionaryPath
@@ -67,17 +66,17 @@ class CoreDictionary():
             return False
 
         try:
-            treeMap = loadDictionary(path, splitter = ' ',  defaultNature = Nature.n)
+            treeMap = loadDictionary(path, splitter = '\t',  defaultNature = Nature.n)
             CoreDictionary.trie.build(treeMap)
             
             # 设置预定义-词典总频次
             totalFrequency = sum([item['totalFrequency'] for item in treeMap.values()])
             Predefine.setTotalFrequency(totalFrequency)
 
-            print(f'核心词典 {path} 加载成功')
+            print(f'核心词典 {path} 加载成功, 读入词条{len(treeMap)}, 总词频{totalFrequency}, 载入词条{CoreDictionary.trie.getSize()}')
         except Exception as e:
             print(f'核心词典 {path} 加载失败！{e}')
-            #traceback.print_exc()
+            traceback.print_exc()
 
         return True
     

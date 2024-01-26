@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/pynjlp')
-
 from nlp.corpus.dictionary.CommonDictionaryMaker import CommonDictionaryMaker
 
 from nlp.utility.Predefine import Predefine 
@@ -25,7 +22,8 @@ class NatureDictionaryMaker(CommonDictionaryMaker):
             new_sentence_list.append(sentence)
         
         self.sentenceList = new_sentence_list
-
+        
+        print('标记完成')
 
     def addDictionary(self):
         print('开始制作词典')
@@ -42,4 +40,6 @@ class NatureDictionaryMaker(CommonDictionaryMaker):
                     self.nGramDictionaryMaker.addPair(pre, word)
 
                 pre = word
+
+        print('词典制作完成')
 

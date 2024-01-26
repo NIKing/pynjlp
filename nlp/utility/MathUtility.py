@@ -1,7 +1,7 @@
+import math
+
 from nlp.utility.Predefine import Predefine
 from nlp.dictionary.CoreBiGramTableDictionary import CoreBiGramTableDictionary
-
-import math
 
 class MathUtility():
     

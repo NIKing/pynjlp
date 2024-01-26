@@ -1,5 +1,5 @@
 # 内部类 - 双数组搜索工具 
-from .bintrie.HashCode import hash_code, char_hash
+from nlp.collection.trie.bintrie.HashCode import hash_code, char_hash
 
 class Searcher():
     
@@ -37,7 +37,8 @@ class Searcher():
         self.charArray = charArray
         self.arrayLength = len(charArray)
         
-        #print(charArray, self.base[0], self.arrayLength)
+        #print(self.trie.toString())
+        #print(charArray, self.base[0], self.arrayLength, self.v)
         self.i = offset
         self.last = self.base[0]
         
@@ -51,7 +52,6 @@ class Searcher():
         n, p = 0, 0
 
         while True:
-            
             #print(f'==【i={self.i}】==【arrayLength={self.arrayLength}】')
             # 指针到头，将起点向前挪一位，重新开始，状态归零
             if self.i == self.arrayLength:
@@ -65,9 +65,8 @@ class Searcher():
             
             # 转移状态 p = base[b] + c = base[char[i - 1]] + char[i] + 1
             # 转移成功 base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
-            #print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1}')
+            #print(f'第{self.i}个字符 ({self.charArray[self.i]})，hashcode = {char_hash(self.charArray[self.i]) + 1} check_len: {len(self.check)} v_len: {len(self.v)}')
             p = b + char_hash(self.charArray[self.i]) + 1
-            #print(f'<<<<<<<【b={b}】【check[p]={self.check[p]}】【p = {p}】')
             if b == self.check[p]:
                 b = self.base[p]
             else:
@@ -80,13 +79,11 @@ class Searcher():
                     break
 
                 b = self.base[0]
-                #print(' ')
                 continue
             
             
             p = b
             n = self.base[p]
-            #print('------', b, self.check[p], n)
             # 判断是否是终止节点
             if b == self.check[p] and n < 0:
                 self.length = self.i - self.begin + 1
@@ -96,7 +93,6 @@ class Searcher():
                 self.last = b
                 self.i += 1
                 
-                #print(' ')
                 return True
 
             self.i += 1

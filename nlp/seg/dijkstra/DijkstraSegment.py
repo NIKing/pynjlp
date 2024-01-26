@@ -1,9 +1,10 @@
 from collections import deque
 
 from nlp.seg.WordBasedSegment import WordBasedSegment
+from nlp.seg.Config import Config
+
 from nlp.seg.common.WordNet import WordNet
 from nlp.seg.dijkstra.path.State import State
-from nlp.seg.Config import Config
 
 import sys
 
@@ -18,9 +19,11 @@ class DijkstraSegment(WordBasedSegment):
         
         # 一元语法模型，生成词网
         self.generateWordNet(wordNetAll)
+        #print(wordNetAll.toString())
 
         # 生成词图
         graph = WordBasedSegment.generateBiGraph(wordNetAll)
+        #print(graph.toString())
         
         # 二元模型解码任务，就是在词图上找出最理想的路径
         vertexList = DijkstraSegment.dijkstra(graph)
@@ -46,19 +49,23 @@ class DijkstraSegment(WordBasedSegment):
         # 找到最短路径放在 path 中
         while len(queue) > 0:
             p = queue.popleft()
+
+            # 对比来自同一个方向(from)节点权重，保留权重值比较小的节点
+            # 意思是说，同一个节点有两个边，保留边权重值小的
             if d[p.vertex] < p.cost:
                 continue
             
-            # 对比当前节点后面的每个边的权重，从最后面节点向前找
+            # 从最后面节点向前开始找，找到每个边
             for edgeFrom in edgesTo[p.vertex]:
 
-                # 注意，最后一个节点在 d 中的值为 0，即刚开始 d[p.vertex] = 0，后面逐渐被替换成节点的权重值
+                # 注意，最后一个节点在 d 中的值为 0，即刚开始 d[p.vertex] = 0，
+                # 这句就是，把 d 里面值逐渐替换成节点的权重值, 并且填充路径数组（每条路径的位置上补充指向的顶点索引）
                 if d[edgeFrom._from] > d[p.vertex] + edgeFrom.weight:
                     d[edgeFrom._from] = d[p.vertex] + edgeFrom.weight
                     queue.append(State(d[edgeFrom._from], edgeFrom._from))
 
                     path[edgeFrom._from] = p.vertex
-        
+
         # 根据path存储的索引，获取结果
         resultList = []
         t = 0

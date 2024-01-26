@@ -32,7 +32,7 @@ class CoreBiGramTableDictionary():
             maxWordId = self.coreDictionary.trie.getSize()
 
             for line in lines:
-                params = line.rstrip('\n').split(' ')
+                params = line.rstrip('\n').split('\t')
                 towWord = params[0].split('@')
                 
                 # 获取整个单词在双数组字典中的base的值(begin)
@@ -85,7 +85,7 @@ class CoreBiGramTableDictionary():
             
             #print(self.pair)
             #print(self.start[:15])
-            #print(f'二元词典 {path} 构建成功')
+            print(f'二元词典 {path} 构建成功')
             
         except Exception as e:
             print(f'二元词典构建失败{e}')
@@ -95,12 +95,8 @@ class CoreBiGramTableDictionary():
     
     @staticmethod
     def reload():
-        self = CoreBiGramTableDictionary
-
-        #self.coreDictionary.reload()
-
         path = NLPConfig.BiGramDictionaryPath
-        return self.load(path)
+        return CoreBiGramTableDictionary.load(path)
     
     @staticmethod
     def getBiFrequency(a, b):
@@ -115,7 +111,7 @@ class CoreBiGramTableDictionary():
         if isinstance(a, int):
             idA = -1 if a < 0 else a
         else:
-            idA = CoreBiGramTableDictionary.coreDictionary.trie.exactMatchSearch(a)
+            idA = self.coreDictionary.trie.exactMatchSearch(a)
 
         if idA < 0:
             return 0
@@ -124,19 +120,16 @@ class CoreBiGramTableDictionary():
         if isinstance(b, int):
             idB = -1 if b < 0 else b
         else:
-            idB = CoreBiGramTableDictionary.coreDictionary.trie.exactMatchSearch(b)
+            idB = self.coreDictionary.trie.exactMatchSearch(b)
 
         if idB < 0:
             return 0
         
-        print('--', self.start[:12])
-        print('--', a, idA)
-        print('--', b, idB)
         
         # 在 [self.start[idA], self.start[idA + 1] - self.start[idA]] 区间内使用二分法查找第二单词编号
         # 之所以需要使用区间查询，是因为在pair中存放的第二单词会是重复的，比如“商品@和”以及“服务@和”第一单词不同但是第二单词相同。
         # self.start[idA] 实际上保存的是上一个单词的offset值
-        index = CoreBiGramTableDictionary.binarySearch(self.pair, self.start[idA], self.start[idA + 1] - self.start[idA], idB)
+        index = self.binarySearch(self.pair, self.start[idA], self.start[idA + 1] - self.start[idA], idB)
         if index < 0:
             return 0
         

@@ -1,6 +1,3 @@
-import sys
-sys.path.append('pynjlp')
-
 from nlp.collection.trie.bintrie.BinTrie import BinTrie
 from nlp.corpus.io.IOUtil import writeTxtByList 
 from nlp.corpus.dictionary.item.Item import Item

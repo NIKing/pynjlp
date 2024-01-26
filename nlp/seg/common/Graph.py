@@ -26,7 +26,7 @@ class Graph:
         #print(self.vertexes[_from].toString())
         #print(self.vertexes[_to].toString())
 
-        self.edgesTo[_to].append(EdgeFrom(_from, _weight, self.vertexes[_from].toString() + '@' + self.vertexes[_to].toString()))
+        self.edgesTo[_to].append(EdgeFrom(_from, _weight, self.vertexes[_from].toString() + '@' + self.vertexes[_to].toString(), _to))
         
         #print(self.edgesTo)
         #print(' ')
@@ -41,9 +41,15 @@ class Graph:
 
         _str = "Graph {"
         _str += "\n"
-        _str += "vertexes =【" + '-'.join([vertex.toString() for vertex in self.vertexes]) + "】"
+        _str += "vertexes =【" + '，'.join([vertex.toString() for vertex in self.vertexes]) + "】"
         _str += "\n"
-        _str += "edgesTo =【" + '-'.join([edge.toString() for edges in self.edgesTo for edge in edges]) + "】"
+        
+        _str += "edgesTo =【"
+        for edges in self.edgesTo:
+            _str += '[' + '，'.join([edge.toString() for edge in edges]) + ']'
+            _str += '\n'
+        _str += "】"
+
         _str += "}"
 
         return _str

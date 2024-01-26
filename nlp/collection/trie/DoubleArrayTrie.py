@@ -1,8 +1,7 @@
-from .bintrie.HashCode import hash_code, char_hash
-from .DoubleArrayTrieSearcher import Searcher, LongestSearcher
+from nlp.collection.trie.bintrie.HashCode import hash_code, char_hash
+from nlp.collection.trie.DoubleArrayTrieSearcher import Searcher, LongestSearcher
 
 class Node:
-    
     def __init__(self):
         self.c = ''
         self.code = 0
@@ -16,6 +15,9 @@ class Node:
 class DoubleArrayTrie:
     check = []
     base  = []
+    
+    size = 0
+    allocSize = 0
 
     key = []
     value = []
@@ -23,7 +25,7 @@ class DoubleArrayTrie:
 
     char = []
     v = []
-
+    
     progress = 0
     nextCheckPos = 0  # 下一次检查的位置
 
@@ -33,7 +35,7 @@ class DoubleArrayTrie:
         self.keySize = 0
         self.allocSize = 0
         self.error = 0
-
+        
         self.enableFastBuild = enableFastBuild 
 
         if buildFrom and self.build(buildFrom) != 0:
@@ -99,12 +101,15 @@ class DoubleArrayTrie:
         self.keySize = _keySize
         self.value = _value
 
+        self.progress = 0
+        self.allocSize = 0
+
         # 32个双字节
         self.resize(65536 * 32)
 
         self.base[0] = 1
         self.nextCheckPos = 0
-        self.progress = 0
+
         
         # 根节点
         root_node = Node()

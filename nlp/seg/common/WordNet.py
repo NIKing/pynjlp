@@ -115,7 +115,6 @@ class WordNet():
             sb.append(f'{line} : {[vertex.toString() for vertex in vertexList]}')
             sb.append("\n")
             line += 1
-
         return ''.join(sb)
 
 

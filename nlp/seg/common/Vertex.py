@@ -2,6 +2,8 @@ from nlp.dictionary.CoreDictionary import CoreDictionary, Attribute
 from nlp.utility.Predefine import Predefine
 from nlp.corpus.tag.Nature import Nature
 
+from nlp.utility.MathUtility import MathUtility
+
 class Vertex():
 
     # 节点对应的词或等效词（如未##数）
@@ -40,6 +42,13 @@ class Vertex():
 
         self.word = word
         self.realWord = realWord
+    
+    def updateFrom(self, _from):
+        """更新节点的前驱节点和最短路径权重"""
+        weight = _from.weight + MathUtility.calculateWeight(_from, self)
+        if self._from == None or self.weight > weight:
+            self._from  = _from
+            self.weight = weight
 
     def compileRealWord(self, realWord, attribute):
         pass

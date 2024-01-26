@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/pnjulp')
-
 from nlp.corpus.dictionary.item.SimpleItem import SimpleItem
 
 class Item(SimpleItem):
@@ -14,5 +11,5 @@ class Item(SimpleItem):
         pass
 
     def toString(self):
-        strLabel = " ".join([key +" "+ str(val) for key, val in self.labelMap.items()])
-        return self.key + " " + strLabel
+        strLabel = "\t".join([key +"\t"+ str(val) for key, val in self.labelMap.items()])
+        return self.key + "\t" + strLabel

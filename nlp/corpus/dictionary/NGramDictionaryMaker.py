@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/pynjlp')
-
 from nlp.collection.trie.bintrie.BinTrie import BinTrie
 from nlp.corpus.io.IOUtil import writeTxtByList 
 
@@ -34,7 +31,7 @@ class NGramDictionaryMaker():
         """保存NGram词典"""
         try:
             entries = self.trie.entrySet()
-            entries = [key +" "+ str(value) for key, value in entries.items()]
+            entries = [key +"\t"+ str(value) for key, value in entries.items()]
             
             writeTxtByList(path, entries)
         except Exception as e:

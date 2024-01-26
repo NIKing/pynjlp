@@ -56,11 +56,21 @@ def getFileList(folderPath):
     if not folderPath:
         return []
     
+    if os.path.isfile(folderPath):
+        return [folderPath]
+
     fileList = []
     try:
         fileList = os.listdir(folderPath)
         fileList = [folderPath +'/'+ file for file in fileList]
-    except IOError:
-        print('【】文件夹未找到文件')
+    except IOError as e:
+        print(f'{e}')
 
     return fileList
+
+
+def lineIterator(filePath):
+    line_list = readlinesTxt(filePath)
+
+    return iter(line_list)
+

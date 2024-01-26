@@ -5,7 +5,7 @@ from nlp.NLP import NLPConfig
 from nlp.corpus.tag.Nature import Nature
 from nlp.corpus.io.IOUtil import loadDictionary 
 
-from nlp.dictionary.CoreDictionary import CoreDictionary
+from nlp.dictionary.CoreDictionary import Attribute 
 
 class DynamicCustomDictionary():
     
@@ -81,7 +81,7 @@ class DynamicCustomDictionary():
         if not word:
             return False
 
-        att = CoreDictionary.Attribute.create(natureWithFrequency) if natureWithFrequency else CoreDictionary.Attribute(Nature.nz, 1)
+        att = Attribute.create(natureWithFrequency) if natureWithFrequency else Attribute(Nature.nz, 1)
         if not att:
             return False
 
