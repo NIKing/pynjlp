@@ -46,6 +46,7 @@ class Vertex():
     def updateFrom(self, _from):
         """更新节点的前驱节点和最短路径权重"""
         weight = _from.weight + MathUtility.calculateWeight(_from, self)
+        #print(_from.toString(), self.toString(), weight)
         if self._from == None or self.weight > weight:
             self._from  = _from
             self.weight = weight

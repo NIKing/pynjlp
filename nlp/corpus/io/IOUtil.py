@@ -71,6 +71,5 @@ def getFileList(folderPath):
 
 def lineIterator(filePath):
     line_list = readlinesTxt(filePath)
-
     return iter(line_list)
 

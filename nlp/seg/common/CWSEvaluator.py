@@ -3,21 +3,20 @@ import re
 
 """中文分词评测工具"""
 class CWSEvaluator:
-    
-    dic = set()
-
-    A_size = 0
-    B_size = 0
-    
-    A_cap_B_size = 0
-
-    IV_R = 0
-    OOV_R = 0
-
-    IV = 0
-    OOV = 0
 
     def __init__(self, dic):
+        self.dic = set()
+
+        self.A_size = 0
+        self.B_size = 0
+        
+        self.A_cap_B_size = 0
+
+        self.IV_R = 0
+        self.OOV_R = 0
+
+        self.IV = 0
+        self.OOV = 0
 
         if isinstance(dic, set):
             self.dic = dic
@@ -39,8 +38,8 @@ class CWSEvaluator:
         wordArray = re.split(r"\s+", gold)
         predArray = re.split(r"\s+", pred)
 
-        self.A_size = len(wordArray)
-        self.B_size = len(predArray)
+        self.A_size += len(wordArray)
+        self.B_size += len(predArray)
         
         goldIndex, predIndex = 0, 0
         goldLen, predLen = 0, 0
@@ -77,7 +76,7 @@ class CWSEvaluator:
                 else:
                     self.OOV += 1
 
-    def getResult(self, percentage):
+    def getResult(self, percentage = True):
         """
         获取PRF值
         -param percentage 是否百分制
@@ -106,7 +105,13 @@ class CWSEvaluator:
     
 
     @staticmethod
-    def get_evaluate_resulte(goldFile, predFile, dictPath):
+    def calculate(goldFile, predFile, dictPath):
+        """
+        计算结果
+        -param goldFile 标准答案
+        -param prefFile 预测结果
+        -param dictPath 所有词字典路径
+        """
         goldIter = lineIterator(goldFile)
         predIter = lineIterator(predFile)
 
@@ -114,12 +119,13 @@ class CWSEvaluator:
 
         gold = next(goldIter)
         pred = next(predIter)
-
+        
+        # 通过对比标准答案和预测结果，进行模型评测
         while gold and pred:
             evaluator.compare(gold, pred)
 
-            gold = next(goldIter)
-            pred = next(predIter)
+            gold = next(goldIter, None)
+            pred = next(predIter, None)
 
         return evaluator.getResult()
     
@@ -134,15 +140,15 @@ class CWSEvaluator:
         return 一个存储准确率的结构
         """
         lineIterators = readlinesTxt(goldFile)
-
+        
+        # 分词后(预测结果)，写入文件内
         wordList = []
-        for line in lineIterators[:3]:
+        for line in lineIterators:
             line = re.sub(r"\s+", "", line)
             words = segment.seg(line)
             
-            wordList.append(''.join([word + " " for word in words]))
+            wordList.append(''.join([word + "  " for word in words]).rstrip("  "))
         
-        # 分词后，写入文件内
         writeTxtByList(outputPath, wordList)
         
-        return CWSEvaluator.get_evaluate_resulte(goldFile, outputPath, dictPath)
+        return CWSEvaluator.calculate(goldFile, outputPath, dictPath)

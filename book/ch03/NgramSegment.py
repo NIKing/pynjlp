@@ -28,7 +28,7 @@ def train_bigram(corpus_path, model_path):
     maker.compute(sents)
     maker.saveTxtTo(model_path)
 
-def load_bigram(model_path, viterbi = False):
+def load_bigram(model_path, viterbi = True):
     """加载模型"""
     NLPConfig.CoreDictionaryPath = model_path + '.txt'
     NLPConfig.BiGramDictionaryPath = model_path + '.ngram.txt'
@@ -38,6 +38,13 @@ def load_bigram(model_path, viterbi = False):
 
     # n元模型加载
     CoreBiGramTableDictionary.reload()
+
+    #print(f"【往】的频次：{CoreDictionary.getTermFrequency('往')}")
+    #print(f"【另】的频次：{CoreDictionary.getTermFrequency('另')}")
+    #print(f"【另一个】的频次：{CoreDictionary.getTermFrequency('另一个')}")
+
+    #print(f"【往@另】的二元语法频次：{CoreBiGramTableDictionary.getBiFrequency('往', '另')}")
+    #print(f"【往@另一个】的二元语法频次：{CoreBiGramTableDictionary.getBiFrequency('往', '另一个')}")
     
     return  ViterbiSegment() if viterbi else DijkstraSegment()
 

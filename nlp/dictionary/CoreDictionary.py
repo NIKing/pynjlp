@@ -93,4 +93,13 @@ class CoreDictionary():
         return ID，如果不存在，则返回 -1
         """
         return CoreDictionary.trie.exactMatchSearch(a)
+    
+    @staticmethod
+    def getTermFrequency(term):
+        attribute = CoreDictionary.trie.get(term)
+        if attribute == None:
+            return 0
+        
+        return attribute['totalFrequency']
+
 

@@ -19,6 +19,7 @@ class ViterbiSegment(WordBasedSegment):
         wordNetAll = WordNet(sentence)
 
         self.generateWordNet(wordNetAll)
+        #print(wordNetAll.toString())
 
         vertexList = ViterbiSegment.viterbi(wordNetAll)
 
@@ -37,7 +38,7 @@ class ViterbiSegment(WordBasedSegment):
 
         # 前向遍历： 由起点出发向后遍历，更新从起点到该节点的最小花费以及前驱指针
         for node in nodes[1]:
-            node.updateFrom(nodes[0].pop(0))
+            node.updateFrom(nodes[0][0])
 
         for i in range(1, len(nodes) - 1):
             nodeArray = nodes[i]
