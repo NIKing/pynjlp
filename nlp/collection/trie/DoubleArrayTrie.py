@@ -37,7 +37,7 @@ class DoubleArrayTrie:
         self.error = 0
         
         self.enableFastBuild = enableFastBuild 
-
+        
         if buildFrom and self.build(buildFrom) != 0:
             print("构造失败")
     

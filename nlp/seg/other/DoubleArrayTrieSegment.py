@@ -7,9 +7,6 @@ from nlp.seg.common.Term import Term
 from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
 
 class DoubleArrayTrieSegment(DictionaryBasedSegment):
-    
-    trie = None
-
     def __init__(self, dictionary):
         super().__init__()
 
