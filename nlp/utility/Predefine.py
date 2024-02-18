@@ -1,6 +1,9 @@
 
 class Predefine:
     
+    # 最小概率值
+    MIN_PROBABILITY = 1e-10
+    
     WORD_SEGMENTER = '@'
 
     # 现在总词频25146057

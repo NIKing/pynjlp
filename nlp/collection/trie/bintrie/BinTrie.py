@@ -1,6 +1,6 @@
-from .BaseNode import BaseNode, Status
-from .Node import Node
-from .HashCode import hash_code
+from nlp.collection.trie.bintrie.BaseNode import BaseNode, Status
+from nlp.collection.trie.bintrie.Node import Node
+from nlp.collection.trie.bintrie.HashCode import hash_code
 
 class BinTrie(BaseNode):
 

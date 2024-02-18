@@ -139,11 +139,11 @@ class CWSEvaluator:
         -param dictPath 训练集单词列表
         return 一个存储准确率的结构
         """
-        lineIterators = readlinesTxt(goldFile)
-        
+        lineList = readlinesTxt(goldFile)
+
         # 分词后(预测结果)，写入文件内
         wordList = []
-        for line in lineIterators:
+        for line in lineList:
             line = re.sub(r"\s+", "", line)
             words = segment.seg(line)
             

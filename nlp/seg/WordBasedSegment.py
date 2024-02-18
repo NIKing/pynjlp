@@ -13,13 +13,16 @@ class WordBasedSegment(Segment):
         """生成一元词网, 根据一元模型生成词网，根据对句子进行全切分生存"""
 
         # 通过字典树切分句子，得到句子中所有单词 —完全切分
-        charArray = wordNetStorage.charArray
+        charArray = wordNetStorage.charArray # 这已经把句子转化成一个一个单词列表了
         searcher = CoreDictionary.trie.getSearcher(charArray, 0)
         while searcher.next():
             # 从 +1 开始，因为词网前后是开始和结尾标记
-            word = ''.join(charArray[searcher.begin:searcher.begin + searcher.length])
+            word = ''.join(charArray[searcher.begin : searcher.begin + searcher.length])
             wordNetStorage.add(searcher.begin + 1, Vertex(" ", word, Attribute(**searcher.value), searcher.index))
         
+        #print(charArray)
+        #print(wordNetStorage.toString())
+
         # 原子分词，保证图连通
         vertexes = wordNetStorage.getVertexes()
         i = 0

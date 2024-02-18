@@ -37,6 +37,8 @@ class DijkstraSegment(WordBasedSegment):
         vertexes = graph.getVertexes()
         edgesTo = graph.getEdgesTo()
         
+        print(graph.toString())
+
         d = [sys.float_info.max] * len(vertexes)
         d[len(d) - 1] = 0
         
@@ -65,6 +67,9 @@ class DijkstraSegment(WordBasedSegment):
                     queue.append(State(d[edgeFrom._from], edgeFrom._from))
 
                     path[edgeFrom._from] = p.vertex
+        
+        print(d)
+        print(path)
 
         # 根据path存储的索引，获取结果
         resultList = []

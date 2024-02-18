@@ -71,8 +71,8 @@ def test_2():
     
     # 最短路径分词
     segment = DijkstraSegment().enableAllNameEntityRecognize(False)
-    #res = segment.seg('商品和服务')
-    res = segment.seg('货币和服务')
+    res = segment.seg('商品和服务')
+    #res = segment.seg('货币和服务')
 
     print(res)
 
@@ -107,6 +107,7 @@ def test_4():
     
     # 最短路径分词
     segment = ViterbiSegment().enableAllNameEntityRecognize(False)
+    #res = segment.seg('商品和服务')
     res = segment.seg('货币和服务')
 
     print(res)

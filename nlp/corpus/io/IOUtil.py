@@ -1,4 +1,5 @@
 import os
+from nlp.corpus.document.sentence.Sentence import Sentence
 
 def loadDictionary(path, splitter = '\t', defaultNature = None):
     if not path:
@@ -48,8 +49,8 @@ def writeTxtByList(filePath, dataList):
     try:
         with open(filePath, "w", encoding='utf8') as file:
            file.writelines('\n'.join(dataList))
-    except IOError:
-        print('写入失败', IOError)
+    except IOError as e:
+        print('写入失败', e)
 
 
 def getFileList(folderPath):
@@ -70,6 +71,23 @@ def getFileList(folderPath):
 
 
 def lineIterator(filePath):
+    if not filePath:
+        return iter([None])
+
     line_list = readlinesTxt(filePath)
     return iter(line_list)
+
+def loadInstance(path):
+    lineList = readlinesTxt(path)
+    
+    sentenceList = []
+    for line in lineList:
+        line = line.strip()
+
+        if len(line) <= 0:
+            continue
+
+        sentenceList.append(Sentence.create(line))
+
+    return sentenceList
 
