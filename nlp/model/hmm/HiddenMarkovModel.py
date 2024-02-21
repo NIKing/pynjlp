@@ -24,8 +24,6 @@ class HiddenMarkovModel(ABC):
                     return None
         
         for i in range(len(self.start_probability)):
-            #self.start_probability[i] = math.log(max(Predefine.MIN_PROBABILITY, self.start_probability[i]))
-
             if self.start_probability[i] == 0.0:
                 self.start_probability[i] = float('-inf')
             else:
@@ -33,16 +31,12 @@ class HiddenMarkovModel(ABC):
 
 
             for j in range(len(self.transition_probability[i])):
-                #self.transition_probability[i][j] = math.log(max(Predefine.MIN_PROBABILITY, self.transition_probability[i][j]))
-
                 if self.transition_probability[i][j] == 0.0:
                     self.transition_probability[i][j] = float('-inf')
                 else:
                     self.transition_probability[i][j] = math.log(self.transition_probability[i][j])
 
             for j in range(len(self.emission_probability[i])):
-                #self.emission_probability[i][j] = math.log(max(Predefine.MIN_PROBABILITY, self.emission_probability[i][j]))
-                
                 if self.emission_probability[i][j] == 0.0:
                     self.emission_probability[i][j] = float('-inf')
                 else:
@@ -69,7 +63,7 @@ class HiddenMarkovModel(ABC):
         累计分布数据最大值等于1，在采样过程中使用随机数也是在（0，1）区间内
         """
         if not log:
-            return []
+            return log
 
         if np.ndim(log) == 1: 
             cdf = [0.0] * len(log)
@@ -218,6 +212,9 @@ class HiddenMarkovModel(ABC):
         频次归一化处理
         """
         _sum = sum(freq)
+        if _sum == 0:
+            return freq
+
         for i in range(len(freq)):
             freq[i] /= _sum
     

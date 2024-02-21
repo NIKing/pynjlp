@@ -1,6 +1,9 @@
 
 class Predefine:
     
+    # 最小int值
+    INTEGER_MIN_VALUE = -2147483648
+
     # 最小概率值
     MIN_PROBABILITY = 1e-10
     

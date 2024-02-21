@@ -5,6 +5,7 @@ sys.path.append('/pynjlp')
 import numpy as np
 
 from nlp.model.hmm.FirstOrderHiddenMarkovModel import FirstOrderHiddenMarkovModel
+from nlp.model.hmm.SecondOrderHiddenMarkovModel import SecondOrderHiddenMarkovModel
 
 # 定义隐状态和观察状态，隐藏状态是健康状态，观察状态是身体表现状态；
 # 健康状态 = （健康，发烧）身体表现状态 = （正常，发冷，头晕）
@@ -44,6 +45,7 @@ def convert_observations_to_index(observations, label_index):
 
     return _list
 
+
 def convert_map_to_matrix(_map, label_index1, label_index2):
     """
     转换映射关系为矩阵, 这个很巧妙，在后面为张量赋值的时候，经常用到。
@@ -69,12 +71,21 @@ def convert_map_to_vector(_map, label_index):
 
     return v.tolist()
 
-def generate_samples(pi, A, B):
-    print(pi)
-    print(A)
-    print(B)
+def generate_samples(model_class, pi, A, B, A2):
+    if A2:
+        model = model_class(pi, A, B, A2)
+    else:
+        model = model_class(pi, A, B)
 
-    model = FirstOrderHiddenMarkovModel(pi, A, B)
+    print('-----新模型参数---------')
+    print(model.start_probability)
+    print(model.transition_probability)
+    print(model.emission_probability)
+    
+    if A2:
+        print(model.transition_probability2)
+
+
     for O, S in model.generateSamples(3, 5, 1):
         print(f'O={O}')
         print(f'身体状态（显）：{[observations[i] for i in O]}')
@@ -93,11 +104,6 @@ def train(pi, A, B):
     """
     given_model = FirstOrderHiddenMarkovModel(pi, A, B)
     trained_model = FirstOrderHiddenMarkovModel()
-    
-    print('--------老模型参数-------')
-    print(pi)
-    print(A)
-    print(B)
 
     # 最后的生成数量设置大一些，否则会造成取对数时参数为0的情况，而报错
     # 设置越大，两个模型的相似度越高
@@ -113,8 +119,30 @@ def train(pi, A, B):
     print(trained_model.transition_probability)
     print(trained_model.emission_probability)
 
-def predict(pi, A, B, observations_index, observations_index_label, states_index_label):
+
+def train_second_model(pi, A, B, A2):
+    given_model = SecondOrderHiddenMarkovModel(pi, A, B, A2)
+    trained_model = SecondOrderHiddenMarkovModel()
+
+    # 最后的生成数量设置大一些，否则会造成取对数时参数为0的情况，而报错
+    # 设置越大，两个模型的相似度越高
+    samples = given_model.generateSamples(3, 10, 100000)
+    trained_model.train(samples)
     
+    assert trained_model.similar(given_model)
+
+    trained_model.unLog()
+
+    print('-----新模型参数---------')
+    print(f'pi={trained_model.start_probability}')
+    print(f'A={trained_model.transition_probability}')
+    
+    print(f'A2={trained_model.transition_probability2}')
+    print(f'B={trained_model.emission_probability}')
+    
+
+
+def predict(pi, A, B, observations_index, observations_index_label, states_index_label):
     given_model = FirstOrderHiddenMarkovModel(pi, A, B)
 
     pred = [0, 0, 0]
@@ -135,13 +163,21 @@ if __name__ == '__main__':
     pi = convert_map_to_vector(start_probability, states_label_index)
 
     # 状态转移概率矩阵—A  发射概率矩阵—B
-    A = convert_map_to_matrix(transition_probability, states_label_index, states_label_index)
-    B = convert_map_to_matrix(emission_probability, states_label_index, observations_label_index)
-    
-    print(pi)
-    print(A)
-    print(B)
+    A  = convert_map_to_matrix(transition_probability, states_label_index, states_label_index)
+    A2 = np.array([[[0.4, 0.6],[0.3, 0.7]],[[0.4, 0.6],[0.3, 0.7]]]).tolist()
 
-    #generate_samples(pi, A, B)
+    B = convert_map_to_matrix(emission_probability, states_label_index, observations_label_index)
+   
+    print('--------老模型参数-------')
+    print('pi=', pi)
+    print('A=', A)
+    print('A2=', A2)
+    print('B=', B)
+    
+    #generate_samples(FirstOrderHiddenMarkovModel, pi, A, B)
+    #generate_samples(SecondOrderHiddenMarkovModel, pi, A, B, A2)
+
     #train(pi, A, B)
+    train_second_model(pi, A, B, A2)
+
     #predict(pi, A, B, observations_index, observations_index_label, states_index_label)

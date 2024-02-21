@@ -1,9 +1,10 @@
 import sys
 import os
+import re
 sys.path.append('/pynjlp')
 
 from nlp.model.hmm.FirstOrderHiddenMarkovModel import FirstOrderHiddenMarkovModel
-#from nlp.model.hmm.SecondOrderHiddenMarkovModel import SecondOrderHiddenMarkovModel
+from nlp.model.hmm.SecondOrderHiddenMarkovModel import SecondOrderHiddenMarkovModel
 from nlp.model.hmm.HMMSegmenter import HMMSegmenter
 from nlp.model.hmm.Vocabulary import Vocabulary
 
@@ -28,6 +29,12 @@ def train(corpus, model):
     print(len(model.transition_probability))
     for row in model.transition_probability:
         print(row)
+    
+    if hasattr(model, 'transition_probability2'):
+        print(' ')
+        print(len(model.transition_probability2))
+        for row in model.transition_probability2:
+            print(row)
     print('--转移概率- end ---')
     print('')
 
@@ -49,7 +56,7 @@ def train(corpus, model):
     #print([(node.c, node.value, node.status) for node in new_child[:20]])
     #print([(node.c, node.value, node.status) for node in segmenter.vocabulary.trie.child[:20]])
 
-    #print(segmenter.segment('商品和服务'))
+    print(segmenter.segment('商品和服务'))
 
     return segmenter
 
@@ -70,16 +77,18 @@ def load_model():
     for row in emission_probability:
         B.append([float(p) for p in row.split(' ')])
 
-    print(pi)
-    print(A)
-    print(len(B))
-    print(len(B[0]))
-    print(B[0][:10])
+    print(f'pi={pi}')
+    print(f'A={A}')
+    print(f'B={B[0][:10]}')
+    print('')
 
     model = FirstOrderHiddenMarkovModel(pi, A, B)
     vocabulary = Vocabulary().from_pretrained('/hanlp/pyhanlp/tests/book/ch04/model/vocabulary.txt')
 
-    segmenter = HMMSegmenter(model, vocabulary)
+    segmenter = HMMSegmenter(model)
+    
+    #print(segmenter.segment('商品和服务'))
+    #print(segmenter.segment(re.sub(r"\s+", "", "扬帆  远东  做  与  中国  合作  的  先行 ")))
 
     return segmenter
 
@@ -108,10 +117,12 @@ def calculate_vocabulary_size():
 if __name__ == '__main__':
 
     #segment = train(MSR.TRAIN_PATH, FirstOrderHiddenMarkovModel())
-    #segment = train(MSR.TRAIN_PATH, SecondOrderHiddenMarkovModel())
-    segment = load_model()
+    segment = train(MSR.TRAIN_PATH, SecondOrderHiddenMarkovModel())
+    #segment = load_model()
 
     result = CWSEvaluator.evaluate(segment, MSR.OUTPUT_PATH, MSR.GOLD_PATH, MSR.TRAIN_WORDS)
+    #result = CWSEvaluator.calculate(MSR.OUTPUT_PATH, MSR.GOLD_PATH, MSR.TRAIN_WORDS)
+    
     print(list(zip(['P', 'R', 'F1', 'OOV-R', 'IV-R'], list(result))))
 
     #calculate_vocabulary_size()

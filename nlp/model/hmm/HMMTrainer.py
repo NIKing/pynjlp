@@ -44,7 +44,7 @@ class HMMTrainer(ABC):
         # 获取分词的标注集
         tagSet = self.getTagSet()
         
-        print(f'共有句子{len(sequenceList)}条')
+        #print(f'共有句子{len(sequenceList)}条')
         #print(sequenceList[0])
 
         # 根据标签序列进行转换样本数据，样本列表为双维数组

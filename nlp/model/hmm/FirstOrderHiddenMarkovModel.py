@@ -2,6 +2,7 @@ import sys
 import math
 
 from nlp.model.hmm.HiddenMarkovModel import HiddenMarkovModel
+from nlp.utility.Predefine import Predefine
 
 """一阶隐马尔可夫模型"""
 class FirstOrderHiddenMarkovModel(HiddenMarkovModel):
@@ -13,7 +14,7 @@ class FirstOrderHiddenMarkovModel(HiddenMarkovModel):
         -param emission_probability 发射状态概率矩阵
         """
         super().__init__(start_probability, transition_probability, emission_probability)
-        #self.toLog()
+        self.toLog()
 
     def generate(self, length):
         """
@@ -58,7 +59,7 @@ class FirstOrderHiddenMarkovModel(HiddenMarkovModel):
         # 观测时序序列长度 和 状态种数
         time, max_s = len(observation), len(self.start_probability)
         
-        # 下面是计算，状态序列和观察序列的两个联合概率，因为第一时刻没有转移矩阵，就单独计算
+        # ----- 前向遍历计算，状态序列和观察序列的两个联合概率，因为第一时刻没有转移矩阵，就单独计算 Start ---
 
         # 状态得分
         score = [0.0] * max_s
@@ -68,7 +69,7 @@ class FirstOrderHiddenMarkovModel(HiddenMarkovModel):
         for i in range(max_s):
             score[i] = self.start_probability[i] + self.emission_probability[i][observation[0]]
         
-        # 第二时刻，使用前一个时刻概率向量 * 一阶转移矩阵 * 发射概率矩阵，参考维特比前向算法
+        # 第二时刻，使用初始概率向量 * 一阶转移矩阵 * 发射概率矩阵计算每个字符的联合概率（这也是计算该字符的{B,M,E,S}标注集的概率），通过对比标注集概率值，得出最高值，并记录位置
         # 注意，因为取对数的原因，所有 * 变成 + 
         link, pre = [[0] * max_s for s in range(time)], [0.0] * max_s
         for t in range(1, time):
@@ -77,7 +78,8 @@ class FirstOrderHiddenMarkovModel(HiddenMarkovModel):
             score = buffer
 
             for s in range(max_s):
-                score[s] = float('-inf') 
+                
+                score[s] = Predefine.INTEGER_MIN_VALUE 
                 for f in range(max_s):
 
                     # [f][s] = N * N, [s][observation[t]] = N * M
@@ -86,19 +88,26 @@ class FirstOrderHiddenMarkovModel(HiddenMarkovModel):
                     if p > score[s]:
                         score[s] = p
                         link[t][s] = f
+            
+            #print(f'{t}: {score}')
+
+        #print(link)
+        # ------ 前向遍历计算 End ----------
         
-        # 获取最大分数，即概率最大的就是最长路径
-        max_score = float('-inf') 
+        # 获取最后一个字符的最大概率标注
+        max_score = Predefine.INTEGER_MIN_VALUE 
         best_s = 0
         for s in range(max_s):
             if score[s] > max_score:
                 max_score = score[s]
                 best_s = s
-
-        for t in range(len(link) - 1, 0, -1):
+        
+        # 后向回溯，找到每个最大概率标注
+        for t in range(len(link) - 1, -1, -1):
             state[t] = best_s
             best_s = link[t][best_s]
-
+        
+        #print(state)
         return max_score
 
 

@@ -1,10 +1,10 @@
 from nlp.model.hmm.HMMTrainer import HMMTrainer
 from nlp.model.perceptron.tagset.CWSTagSet import CWSTagSet
 
-#from nlp.dictionary.other.CharTable import CharTable
+from nlp.dictionary.other.CharTable import CharTable
 
-from pyhanlp import *
-CharTable = JClass('com.hankcs.hanlp.dictionary.other.CharTable')
+#from pyhanlp import *
+#CharTable = JClass('com.hankcs.hanlp.dictionary.other.CharTable')
 
 """模型分词器"""
 class HMMSegmenter(HMMTrainer):
@@ -39,29 +39,32 @@ class HMMSegmenter(HMMTrainer):
         return charList
 
 
-    def segment(self, txt) -> list:
-        txt = CharTable.convert(txt)
-        
-        # 被预测的句子转换编号
+    def segment(self, origin_txt) -> list:
+        # 字符正规化
+        txt = CharTable.convert(origin_txt)
+
+        # 被预测的句子，词表转换编码
         obsArray = [self.vocabulary.idOf(t) for t in txt]
         
         # 进行模型预测，tagArray = 结果
         tagArray = [0] * len(txt)
         self.model.predict(obsArray, tagArray)
         
+        #print(self.tagSet.stringIdMap.keys())
+        #print([(tag, self.tagSet.idStringMap[tag]) for tag in tagArray])
+
         # 根据标注进行截断
-        wordList, result = [], [txt[0]]
+        wordList, result = [], [origin_txt[0]]
         for i in range(1, len(tagArray)):
             
             if tagArray[i] == self.tagSet.B or tagArray[i] == self.tagSet.S:
                 wordList.append(''.join(result))
                 result = []
             
-            result.append(txt[i])
+            result.append(origin_txt[i])
 
         if len(result) != 0:
             wordList.append(''.join(result))
-
 
         return wordList
 
