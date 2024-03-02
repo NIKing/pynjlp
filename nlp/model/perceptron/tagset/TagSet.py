@@ -1,4 +1,3 @@
-
 class TagSet:
 
     def __init__(self, _type):

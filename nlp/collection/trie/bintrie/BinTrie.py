@@ -2,6 +2,7 @@ from nlp.collection.trie.bintrie.BaseNode import BaseNode, Status
 from nlp.collection.trie.bintrie.Node import Node
 from nlp.collection.trie.bintrie.HashCode import hash_code
 
+"""首字散列，其余二分的字典树"""
 class BinTrie(BaseNode):
 
     def __init__(self, map_data = None):
@@ -26,7 +27,8 @@ class BinTrie(BaseNode):
         
         #print('----------start----------')
         #print(f'key={key}, len={len(key)}') 
-
+        
+        # 需要给自己挂子节点
         branch = self
         for char in key[:len(key) - 1]:
             #print(branch.getChar(), branch)
@@ -35,7 +37,7 @@ class BinTrie(BaseNode):
             branch.addChild(Node(char, Status.NOT_WORD, None))
             branch = branch.getChild(char)
         
-        # 最后一个字符，增加属性
+        # 当最后一个字符时候，增加结束属性
         branch.addChild(Node(key[len(key) - 1], Status.WORD_END, value))
         self.size += 1
         #print('-----------end-----------')

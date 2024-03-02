@@ -135,12 +135,21 @@ class DoubleArrayTrie:
         if self.error < 0:
             return []
 
-        #print('parent____c=', parent.c, 'right===', parent.right, 'left===', parent.left, 'code===', parent.code)
+        #print('parent____c=', parent.c, 'right===', parent.right, 'left===', parent.left, 'code===', parent.code, 'depth===', parent.depth)
+        #print('key========', self.key)
         
         siblings = []
-        prev, i = 0, parent.left
-        while i < parent.right:
+        prev = 0
+        i = parent.left
+        
+        # 很容易迷惑为什么明明this.key是所有字典列表，但是却能找到父节点下的子节点??????
+        # 第一，在这里要特别注意，循环时 i 是从父节点left值开始的        
+        # 第二，循环内有个判断，当this.key[i]的长度小于父节点的深度，就继续增加 i 值
+        # 通过以上两个点，就可以在所有字典中找到父节点下所有子节点
 
+        while i < parent.right:
+            
+            # 这个判断比较重要，注意并不是小于等于1，而是小于1。因为等于0是根节点，整个节点深度是从1开始的，所以在判断的时候使用小于
             length = self.length[i] if self.length != None else len(self.key[i])
             if length < parent.depth:
                 i += 1
@@ -163,7 +172,7 @@ class DoubleArrayTrie:
                 tmp_node.depth = parent.depth + 1
                 tmp_node.code  = cur
                 tmp_node.left  = i
-                tmp_node.c     = tmp[parent.depth] if len(tmp) > parent.depth else 0
+                tmp_node.c     = tmp[parent.depth] if len(tmp) > parent.depth else 0 
                 
                 if len(siblings) != 0:
                     siblings[len(siblings) - 1].right = i
@@ -254,7 +263,7 @@ class DoubleArrayTrie:
         for i in range(len(siblings)):
             self.check[begin + siblings[i].code] = begin
             self.char[begin + siblings[i].code] = siblings[i].c
-            #print(f'====insert-Middle=【begin={begin}】【({i}), char={siblings[i].c} code={siblings[i].code}】【pos={pos}】')
+            #print(f'====insert-Middle=【begin={begin}】【({i}), char={siblings[i].c}, code={siblings[i].code}, right={siblings[i].right}，pos={pos}，depth={siblings[i].depth}】')
         
         # 检查每个子节点, 若其没有孩子，就将它的base设置 -1，否则就调用 insert 建立关系 
         # 给 base 赋值，建立父节点 (base[begin + s.code]) 与子节点 (h) 的一对多的关系

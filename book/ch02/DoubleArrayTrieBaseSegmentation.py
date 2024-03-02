@@ -12,6 +12,14 @@ from nlp.seg.other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
 
 def createTinyDictionary():
     return {
+        "自然": "nature",
+        "自然人": "human",
+        "自然语言": "language",
+        "自语": "talk to oneself",
+        "入门": "introduction",
+    }
+
+    return {
         "±": "w",
         "三七开": "san qi kai",
         "三三两两": "shan shan liang liang",

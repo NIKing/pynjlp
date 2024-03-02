@@ -71,7 +71,7 @@ def convert_map_to_vector(_map, label_index):
 
     return v.tolist()
 
-def generate_samples(model_class, pi, A, B, A2):
+def generate_samples(model_class, pi, A, B, A2 = None):
     if A2:
         model = model_class(pi, A, B, A2)
     else:
@@ -86,7 +86,7 @@ def generate_samples(model_class, pi, A, B, A2):
         print(model.transition_probability2)
 
 
-    for O, S in model.generateSamples(3, 5, 1):
+    for O, S in model.generateSamples(3, 5, 2):
         print(f'O={O}')
         print(f'身体状态（显）：{[observations[i] for i in O]}')
         
@@ -115,9 +115,9 @@ def train(pi, A, B):
     trained_model.unLog()
 
     print('-----新模型参数---------')
-    print(trained_model.start_probability)
-    print(trained_model.transition_probability)
-    print(trained_model.emission_probability)
+    print(f'pi= {trained_model.start_probability}')
+    print(f'A= {trained_model.transition_probability}')
+    print(f'B= {trained_model.emission_probability}')
 
 
 def train_second_model(pi, A, B, A2):
@@ -171,13 +171,13 @@ if __name__ == '__main__':
     print('--------老模型参数-------')
     print('pi=', pi)
     print('A=', A)
-    print('A2=', A2)
+    #print('A2=', A2)
     print('B=', B)
     
     #generate_samples(FirstOrderHiddenMarkovModel, pi, A, B)
     #generate_samples(SecondOrderHiddenMarkovModel, pi, A, B, A2)
 
-    #train(pi, A, B)
-    train_second_model(pi, A, B, A2)
+    train(pi, A, B)
+    #train_second_model(pi, A, B, A2)
 
     #predict(pi, A, B, observations_index, observations_index_label, states_index_label)

@@ -56,17 +56,28 @@ def train(corpus, model):
     #print([(node.c, node.value, node.status) for node in new_child[:20]])
     #print([(node.c, node.value, node.status) for node in segmenter.vocabulary.trie.child[:20]])
 
-    print(segmenter.segment('商品和服务'))
+    for O, S in model.generateSamples(3, 20, 2):
+        char_array = [segmenter.vocabulary.idStringMap[o] for o in O]
+        print('O_1=', char_array)
+        print('O=', O)
+        print('O_2=', [segmenter.vocabulary.idOf(c) for c in char_array])
+
+        #print('S=', S)
+    #print(segmenter.segment('商品和服务'))
 
     return segmenter
 
 def load_model():
     #vocabulary = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/vocabulary.txt')
     
+    #start_probability = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/start_probability.txt')
+    #transition_probability = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/transition_probability.txt')
+    #emission_probability = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/emission_probability.txt')
+    
     start_probability = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/start_probability.txt')
     transition_probability = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/transition_probability.txt')
     emission_probability = IOUtil.readlinesTxt('/hanlp/pyhanlp/tests/book/ch04/model/emission_probability.txt')
-    
+
     pi = [float(p) for p in start_probability[0].split(' ')]
 
     A =  []
@@ -86,6 +97,7 @@ def load_model():
     vocabulary = Vocabulary().from_pretrained('/hanlp/pyhanlp/tests/book/ch04/model/vocabulary.txt')
 
     segmenter = HMMSegmenter(model)
+
     
     #print(segmenter.segment('商品和服务'))
     #print(segmenter.segment(re.sub(r"\s+", "", "扬帆  远东  做  与  中国  合作  的  先行 ")))
@@ -116,8 +128,8 @@ def calculate_vocabulary_size():
 
 if __name__ == '__main__':
 
-    #segment = train(MSR.TRAIN_PATH, FirstOrderHiddenMarkovModel())
-    segment = train(MSR.TRAIN_PATH, SecondOrderHiddenMarkovModel())
+    segment = train(MSR.TRAIN_PATH, FirstOrderHiddenMarkovModel())
+    #segment = train(MSR.TRAIN_PATH, SecondOrderHiddenMarkovModel())
     #segment = load_model()
 
     result = CWSEvaluator.evaluate(segment, MSR.OUTPUT_PATH, MSR.GOLD_PATH, MSR.TRAIN_WORDS)

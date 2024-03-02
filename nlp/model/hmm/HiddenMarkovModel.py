@@ -68,7 +68,7 @@ class HiddenMarkovModel(ABC):
         if np.ndim(log) == 1: 
             cdf = [0.0] * len(log)
             
-            # 注意，计算的是累计值，其中Math.exp()是获取以e为自然底数，
+            # 注意，计算的是累计值，其中Math.exp()是获取以e为自然底数，将之前的对数还原为原值
             cdf[0] = math.exp(log[0])
             for i in range(1, len(cdf) - 1):
                 cdf[i] = cdf[i - 1] + math.exp(log[i])
