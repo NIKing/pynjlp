@@ -24,4 +24,6 @@ if __name__ == '__main__':
     training_set =  base_path + 'train.csv'
     
     model = CheapFeatureClassifier()
-    model.train(training_set, 10)
+    res = model.train(training_set, 10, False)
+
+    print(res)

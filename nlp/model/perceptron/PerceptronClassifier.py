@@ -49,17 +49,17 @@ class PerceptronClassifier(ABC):
         instanceList = self.readInstance(corpus, featureMap)
          
         if averagePerceptron:
-            self.model = self.trainAveragedPerceptron(instanceList, featureMap, maxInteration)
+            self.model = self.trainAveragedPerceptron(instanceList, featureMap, maxIteration)
         else:
-            self.model = self.trainNaivePercetron(instanceList, featureMap, maxInteration)
+            self.model = self.trainNaivePerceptron(instanceList, featureMap, maxIteration)
         
         # 训练后，特征不可写
         featureMap.mutable = False
 
-        return self.evalute(instanceList)
+        return self.evaluate(instanceList)
 
 
-    def trainNaivePerceptron(self, instanceList, featureMap, maxInteration):
+    def trainNaivePerceptron(self, instanceList, featureMap, maxIteration):
         """
         朴素感知机训练算法
         -param instancelist 训练实例列表
@@ -68,7 +68,7 @@ class PerceptronClassifier(ABC):
         """
         model = LinearModel(featureMap, [0.0] * len(featureMap))
 
-        for it in maxInteration:
+        for it in range(maxIteration):
             for instance in instanceList:
                 y = model.decode(instance.x)
 
@@ -78,7 +78,7 @@ class PerceptronClassifier(ABC):
         return model
 
 
-    def trainAveragedPerceptron(self, instanceList, featureMap, maxInteration):
+    def trainAveragedPerceptron(self, instanceList, featureMap, maxIteration):
         """
         平均感知机训练算法
         -param instancelist 训练实例列表
@@ -89,7 +89,7 @@ class PerceptronClassifier(ABC):
         model = AveragedPerceptron(featureMap, parameter)
         
         t = 0
-        for it in range(maxInteration):
+        for it in range(maxIteration):
 
             for instance in instanceList:
                 t += 1
@@ -114,11 +114,8 @@ class PerceptronClassifier(ABC):
         instanceList = []
         lineIterator = pd.read_csv(corpus).loc[:,[True, True]].values
 
-        print(lineIterator)
-
-        for line in lineIterator[:10]:
+        for line in lineIterator:
             text, label = line
-            print(text, label, featureMap)
 
             x = self.extractFeature(text, featureMap)
             y = featureMap.tagSet.add(label)
@@ -152,3 +149,23 @@ class PerceptronClassifier(ABC):
         featureId = featureMap.idOf(feature)
         if featureId != -1:
             featureList.append(featureId)
+
+
+    def evaluate(self, instanceList):
+        """模型评估"""
+        TP, FP, FN = 0, 0, 0,
+        for instance in instanceList:
+            y = self.model.decode(instance.x)
+            if y == 1:
+                if instance.y == 1:
+                    TP += 1
+                else:
+                    FP += 1
+            elif instance.y == 1:
+                FN += 1
+
+        p = TP / (TP + FP) * 100
+        r = TP / (TP + FN) * 100
+
+        return p, r, 2 * p * r / (p + r)
+

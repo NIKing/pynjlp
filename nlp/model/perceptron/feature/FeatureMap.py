@@ -4,5 +4,3 @@ class FeatureMap():
         self.size = 0
         self.tagSet  = tagSet
         self.mutable = mutable
-
-

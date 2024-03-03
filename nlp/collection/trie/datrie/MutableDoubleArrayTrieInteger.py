@@ -15,7 +15,7 @@ class MutableDoubleArrayTrieInteger:
     UNUSED_CHAR = '\000'
     
     # 终止字符的codePoint, 这个字符作为叶节点的标识
-    UNUSED_CHAR_VALUE = UNUSED_CHAR
+    UNUSED_CHAR_VALUE = ord(UNUSED_CHAR)
 
     def __init__(self, stringIntegerMap = None, entrySet = None, charMap = None):
         self.size = 0
@@ -50,7 +50,7 @@ class MutableDoubleArrayTrieInteger:
         """键值对个数"""
         return self.size
 
-    def isEmpty(self) -> bool:
+    def isSizeEmpty(self) -> bool:
         return self.size == 0
 
     def expandArray(self, maxSize):
@@ -63,7 +63,7 @@ class MutableDoubleArrayTrieInteger:
         if maxSize >= self.LEAF_BIT:
             return
 
-        for i in range(maxSize):
+        for i in range(curSize, maxSize + 1):
             self.base.append(0)
             self.check.append(0)
 
@@ -71,6 +71,7 @@ class MutableDoubleArrayTrieInteger:
 
     def addFreeLink(self, index):
         """添加自由连接"""
+        # self.base[0] 是上一个节点，获取上一个节点在 check[] 数组中的数据，作为当前节点在 check[] 数组中的数据
         self.check[index] = self.check[-self.base[0]]
         self.check[-self.base[0]] = -index
 
@@ -82,7 +83,6 @@ class MutableDoubleArrayTrieInteger:
         """将index从空闲循环链表中删除"""
         self.base[-self.check[index]] = self.base[index]
         self.check[-self.base[index]] = self.check[index]
-
 
     def insert(self, key, value, overwrite = False):
         """
@@ -133,9 +133,17 @@ class MutableDoubleArrayTrieInteger:
 
         return True
     
+    def isLeafValue(self, value):
+        return value > 0 and value & self.LEAF_BIT != 0
+
+
     def setLeafValue(self, value) -> int:
-        """最高4位-置1，或运算"""
+        """最高4位置1，| => 或运算"""
         return value | self.LEAF_BIT
+
+    def getLeafValue(self, value) -> int:
+        """最高4位置0， ^ => 按位异或运算"""
+        return value ^ self.LEAF_BIT
 
     def getBaseArraySize(self) -> int:
         return len(self.base)
@@ -154,21 +162,6 @@ class MutableDoubleArrayTrieInteger:
 
     def isEmpty(self, index):
         return self.getCheck(index) <= 0
-
-    def getNextFreeBase(self, nextChar) -> int:
-        index = -self.getCheck(0)
-
-        while index != 0:
-            # 因为 Root 的index从1开始，所以至少大于1
-            if index > nextChar + 1:
-                return index - nextChar
-
-            index = -self.getCheck(index)
-
-        oldSize = self.getBaseArraySize()
-        self.expandArray(oldSize + 10240)
-
-        return oldSize
 
     def transfer(self, state, ids):
         """
@@ -200,7 +193,15 @@ class MutableDoubleArrayTrieInteger:
         if len(ids) == 0:
             return -1
 
-        return self.transfer(state, ids) 
+        return self.transfer(state, ids)
+
+
+    def stateValue(self, state):
+        leaf = self.getBase(state) + self.UNUSED_CHAR_VALUE
+        if self.getCheck(leaf) == state:
+            return self.getLeafValue(self.getBase(leaf))
+
+        return -1
 
     def get(self, key, start = 0) -> int:
         """
@@ -251,6 +252,51 @@ class MutableDoubleArrayTrieInteger:
     def remove(self, key) -> int:
         return self.delete(key)
 
+    def delete(self, key):
+        if not key:
+            return -1
+
+        curState = 1
+        ids  = self.charMap.toIdList(key)
+        path = [0] * (len(ids) + 1)
+
+        for i in range(len(ids)):
+            c = ids[i]
+            if self.getBase(curState) + c >= self.getBaseArraySize() \
+                    or (self.getCheck(self.getBase(curState) + c) != curState):
+                        break
+
+            curState = self.getBase(curState) + c
+
+
+        ret = -1
+        if i == len(ids):
+            if self.getCheck(self.getBase(curState) + self.UNUSED_CHAR_VALUE) == curState:
+                this.size -= 1
+
+                ret = self.getLeafValue(self.getBase(self.getBase(curState)) + self.UNUSED_CHAR_VALUE)
+                path[(len(path)-1)] = self.getBase(curState) + self.UNUSED_CHAR_VALUE
+
+                for j in range(len(path) - 1, -1, -1):
+                    isLeaf = True
+                    state = path[i]
+
+                    for k in range(self.charMap.getCharsetSize()):
+                        if self.isLeafValue(self.getBase(state)):
+                            break
+
+                        if self.getBase(state) + k < self.getBaseArraySize() \
+                                and self.getCheck(self.getBase(state)) + k == state:
+                                    isLeaf = False
+                                    break
+
+                    if not isLeaf:
+                        break
+
+                    self.addFreeLink(state)
+
+        return ret
+
     
     def solveConflict(self, parent, newChild):
         """
@@ -274,7 +320,7 @@ class MutableDoubleArrayTrieInteger:
 
         # 移动旧子节点到新的位置
         newBase = self.searchFreeBase(children)
-        chidlren.remove(newChild)
+        children.remove(newChild)
 
         for c in children:
             child = newBase + c
@@ -298,3 +344,50 @@ class MutableDoubleArrayTrieInteger:
 
 
         self.setBase(parent, newBase)
+
+    def searchFreeBase(self, children):
+        """寻找空闲空间"""
+        minChild = children[0]
+        maxChild = children[-1]
+
+        current = 0
+        while self.getCheck(current) != 0:
+            if current > minChild + 1:
+                base = current - minChild
+                ok = True
+
+                for it in children:
+                    to = base + it
+                    if to >= self.getBaseArraySize():
+                        ok = False
+                        break
+
+                    if not self.isEmpty(to):
+                        ok = False
+                        break
+
+
+                if ok:
+                    return base
+
+            current = -self.getCheck(current)
+
+        oldSize = self.getBaseArraySize()
+        self.expandArray(oldSize + maxChild)
+
+        return oldSize
+
+    def getNextFreeBase(self, nextChar) -> int:
+        index = -self.getCheck(0)
+
+        while index != 0:
+            # 因为 Root 的index从1开始，所以至少大于1
+            if index > nextChar + 1:
+                return index - nextChar
+
+            index = -self.getCheck(index)
+
+        oldSize = self.getBaseArraySize()
+        self.expandArray(oldSize + 10240)
+
+        return oldSize

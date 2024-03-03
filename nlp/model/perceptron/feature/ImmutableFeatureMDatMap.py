@@ -1,5 +1,6 @@
 from nlp.model.perceptron.feature.FeatureMap import FeatureMap
 from nlp.collection.trie.datrie.MutableDoubleArrayTrieInteger import MutableDoubleArrayTrieInteger 
+
 """用MutableDoubleArrayTrie实现的ImmutableFeatureMap"""
 class ImmutableFeatureMDatMap(FeatureMap):
 
@@ -15,6 +16,9 @@ class ImmutableFeatureMDatMap(FeatureMap):
         if featureIdSet != None:
             for entry in featureIdSet:
                 self.dat.put(entry.getKey(), entry.getValue())
+    
+    def __len__(self):
+        return self.dat.size
 
     def idOf(self, string):
         return self.dat.get(string)
