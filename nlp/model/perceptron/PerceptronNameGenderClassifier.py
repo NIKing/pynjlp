@@ -1,5 +1,6 @@
 from nlp.model.perceptron.PerceptronClassifier import PerceptronClassifier
 
+"""标准的姓名-性别感知机分类器"""
 class PerceptronNameGenderClassifier(PerceptronClassifier):
     def __init__(self, model = None):
         super().__init__(model)
@@ -14,7 +15,7 @@ class PerceptronNameGenderClassifier(PerceptronClassifier):
 
         featureList = []
         
-        givenName = self.extractGiveName(text)
+        givenName = self.extractGivenName(text)
         self.addFeature("1" + givenName[:1], featureMap, featureList)
         self.addFeature("2" + givenName[1:], featureMap, featureList)
 

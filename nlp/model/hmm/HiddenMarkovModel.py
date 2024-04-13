@@ -59,7 +59,7 @@ class HiddenMarkovModel(ABC):
     def logToCdf(self, log):
         """
         对数概率值转为累计分布函数
-        之所以需要用到累计分布，是因为下面需要使用二分法进行采样
+        之所以需要用到累计分布，是因为下面需要使用searchsorted排序采样
         累计分布数据最大值等于1，在采样过程中使用随机数也是在（0，1）区间内
         """
         if not log:

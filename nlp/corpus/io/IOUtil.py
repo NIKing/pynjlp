@@ -1,4 +1,6 @@
 import os
+import numpy as np
+
 from nlp.corpus.document.sentence.Sentence import Sentence
 
 def loadDictionary(path, splitter = '\t', defaultNature = None):
@@ -90,4 +92,12 @@ def loadInstance(path):
         sentenceList.append(Sentence.create(line))
 
     return sentenceList
+
+
+def writeListToBin(path, listData):
+    """保存list数据到.bin文件"""
+    float_array = np.array(listData)
+    
+    with open(path, 'wb') as f:
+        f.write(float_array.tobytes())
 

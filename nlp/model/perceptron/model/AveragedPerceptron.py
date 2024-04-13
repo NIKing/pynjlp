@@ -41,5 +41,5 @@ class AveragedPerceptron(LinearModel):
     def average(self, total, timestamp, current):
         for i in range(len(self.parameter)):
             self.parameter[i] = (total[i] + (current - timestamp[i]) * self.parameter[i]) / current
-
-
+        
+        return self

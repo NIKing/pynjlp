@@ -12,5 +12,8 @@ class LockableFeatureMap(ImmutableFeatureMDatMap):
         if id == -1 and self.mutable:
             id = self.dat.getSize()
             self.dat.put(string, id)
-
+        
+        #print('--保存特征到双数组DoubleArrayTrie---')
+        #print(id, string)
+        #print('-------------------')
         return id

@@ -10,7 +10,7 @@ class ImmutableFeatureMDatMap(FeatureMap):
         if dat != None:
             self.dat = dat
             return
-
+       
         self.dat = MutableDoubleArrayTrieInteger(featureIdMap)
         
         if featureIdSet != None:
@@ -30,5 +30,6 @@ class ImmutableFeatureMDatMap(FeatureMap):
         return self.dat.entrySet()
 
     def save(self, out):
+        """保存模型参数"""
         self.tagSet.save(out)
         self.dat.save(out)

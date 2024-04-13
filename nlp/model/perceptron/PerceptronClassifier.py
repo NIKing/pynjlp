@@ -20,6 +20,7 @@ class Instance():
         self.x = x
         self.y = y
 
+
 """感知机基类-二分类"""
 class PerceptronClassifier(ABC):
     def __init__(self, model = None):
@@ -28,7 +29,7 @@ class PerceptronClassifier(ABC):
             return "模型不是分类模型"
         
         if isinstance(model, str):
-            self.model = LinearModel(model)
+            self.model = LinearModel(modelFile = model)
         else:
             self.model = model
 
@@ -67,7 +68,6 @@ class PerceptronClassifier(ABC):
         -param maxinteration 最大训练次数
         """
         model = LinearModel(featureMap, [0.0] * len(featureMap))
-
         for it in range(maxIteration):
             for instance in instanceList:
                 y = model.decode(instance.x)
@@ -100,9 +100,7 @@ class PerceptronClassifier(ABC):
                     model.update(instance.x, instance.y, _sum, time, t)
 
 
-        model.average(_sum, time, t)
-        return model
-
+        return model.average(_sum, time, t)
 
     def readInstance(self, corpus, featureMap):
         """
@@ -113,10 +111,12 @@ class PerceptronClassifier(ABC):
         """
         instanceList = []
         lineIterator = pd.read_csv(corpus).loc[:,[True, True]].values
-
+        
+        lineIterator = lineIterator[:2]
+        print(f'训练条目总数:{len(lineIterator)}')
         for line in lineIterator:
             text, label = line
-
+            
             x = self.extractFeature(text, featureMap)
             y = featureMap.tagSet.add(label)
 
@@ -142,17 +142,30 @@ class PerceptronClassifier(ABC):
     def addFeature(self, feature, featureMap, featureList):
         """
         向特征向量插入特征
-        -param feature 特征
-        -param featureMap 特征映射, 由双数组树构成
-        -param featureList 特征向量
+        -param str  feature 特征
+        -param map  featureMap 特征映射, 由双数组树构成
+        -param list featureList 特征向量
         """
         featureId = featureMap.idOf(feature)
         if featureId != -1:
             featureList.append(featureId)
 
+    def predict(self, text):
+        """预测"""
+        y = self.model.decode(self.extractFeature(text, self.model.featureMap))
+        if y == -1:
+            y = 0
+
+        return self.model.tagSet().stringOf(y)
 
     def evaluate(self, instanceList):
-        """模型评估"""
+        """
+        模型评估
+        -param instanceList 实例列表，当类型是路径，就需要加载成实例对象
+        """
+        if isinstance(instanceList, str):
+            instanceList = self.readInstance(instanceList, self.model.featureMap)
+
         TP, FP, FN = 0, 0, 0,
         for instance in instanceList:
             y = self.model.decode(instance.x)
@@ -168,4 +181,6 @@ class PerceptronClassifier(ABC):
         r = TP / (TP + FN) * 100
 
         return p, r, 2 * p * r / (p + r)
-
+    
+    def getModel(self):
+        return self.model

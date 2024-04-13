@@ -1,4 +1,6 @@
 from nlp.collection.trie.datrie.Utf8CharacterMapping import Utf8CharacterMapping
+from nlp.collection.trie.datrie.SetMap import SetMap
+from nlp.collection.trie.datrie.KeyValuePair import KeyValuePair
 
 """
 可变的双数组trie树
@@ -15,6 +17,7 @@ class MutableDoubleArrayTrieInteger:
     UNUSED_CHAR = '\000'
     
     # 终止字符的codePoint, 这个字符作为叶节点的标识
+    # ord() 既可以把字符转unicode码点，也可以把 ascii 码转 unicode码
     UNUSED_CHAR_VALUE = ord(UNUSED_CHAR)
 
     def __init__(self, stringIntegerMap = None, entrySet = None, charMap = None):
@@ -33,18 +36,26 @@ class MutableDoubleArrayTrieInteger:
 
         self.clear()
 
+    def entrySet(self):
+        pair = KeyValuePair(self)
+
+        #for s in range(self.size):
+        for s in range(2):
+            print('+++++++++++')
+            yield pair.next() 
+
     def clear(self):
         self.base  = []
         self.check = [] 
 
         self.base.append(0)
         self.check.append(0)
-
+        
+        # ???
         self.base.append(1)
         self.check.append(0)
 
         self.expandArray(self.charMap.getInitSize())
-
 
     def getSize(self) -> int:
         """键值对个数"""
@@ -78,7 +89,6 @@ class MutableDoubleArrayTrieInteger:
         self.base[index] = self.base[0]
         self.base[0] = -index
 
-
     def deleteFreeLink(self, index):
         """将index从空闲循环链表中删除"""
         self.base[-self.check[index]] = self.base[index]
@@ -97,37 +107,55 @@ class MutableDoubleArrayTrieInteger:
 
         if value < 0 or (value & self.LEAF_BIT) != 0:
             return False
-
-        value = self.setLeafValue(value)
-
-        ids = self.charMap.toIdList(key + self.UNUSED_CHAR)
         
-        # 根节点（fromState） index 为 1
+        print('insert', key, value)
+        value = self.setLeafValue(value)
+        ids = self.charMap.toIdList(key + self.UNUSED_CHAR)     # 一串字符将变成UTF-8类型的字符数组, eg: 珍 = b'\xe7\x8f\x8d\x00'
+        print('change:', value, ids, f'ids_0={ids[0]}')
+        
+        # 根节点（fromState = 1)
         fromState, toState, index = 1, 1, 0
         while index < len(ids):
             c = ids[index]
             toState = self.getBase(fromState) + c   # to = base[from] + c
             self.expandArray(toState)
-
+            
+            print(f'b={fromState}')
+            print(f'begin={self.getBase(fromState)}', f'c={c}')
+            print(f'p={toState}')
+            #print(f'check={self.getCheck(toState)}')
+            
+            # 前后字符没有建立父子关系
             if self.isEmpty(toState):
                 self.deleteFreeLink(toState)
-
+                
+                # 建立转移成功条件, 给当前节点建立父
                 self.setCheck(toState, fromState) # check[to] = from
-                if index == len(ids) - 1:   # Leaf
-                    self.size += 1
+                print(f'to_check={toState}, value={fromState}')
+                
+                # 最后一个子节点，设置值
+                if index == len(ids) - 1:   
+                    self.size += 1          # 代表一组字典添加成功
                     self.setBase(toState, value)
+                    print(f'to_base={toState}, value={value}')
                 else:
+                    # 建立父子关系, 把子节点挂在当前当节点上
                     nextChar = ids[(index + 1)]
                     self.setBase(toState, self.getNextFreeBase(nextChar))   # base[to] = free_state - c
-
+                    print(f'to_base={toState}, value={self.getNextFreeBase(nextChar)}')
+            
+            # 若建立的关系与父级不同，则进行修正
             elif self.getCheck(toState) != fromState:
+                print('solveConf')
                 self.solveConflict(fromState, c)
                 continue
 
             fromState = toState
             index += 1
-
-
+            
+            print('----------')
+        
+        # 覆盖最后转移字符的值，不管是否字符串中最后一个字符（默认最后一个字符应该是 000)
         if overwrite:
             self.setBase(toState, value)
 
@@ -136,13 +164,12 @@ class MutableDoubleArrayTrieInteger:
     def isLeafValue(self, value):
         return value > 0 and value & self.LEAF_BIT != 0
 
-
     def setLeafValue(self, value) -> int:
-        """最高4位置1，| => 或运算"""
+        """最高4位置1，'|' 使用二进制，按位或运算"""
         return value | self.LEAF_BIT
 
     def getLeafValue(self, value) -> int:
-        """最高4位置0， ^ => 按位异或运算"""
+        """最高4位置0， '^'  使用二进制，按位异或运算, 相当于把或运算还原"""
         return value ^ self.LEAF_BIT
 
     def getBaseArraySize(self) -> int:
@@ -170,7 +197,7 @@ class MutableDoubleArrayTrieInteger:
         -param ids/codePoint
         当这个参数类型为数组的时候，循环获取每个元素的状态
         当类型为数字时候，执行toIdList()，再执行调用自身函数获取元素状态
-        return -1转移失败
+        return -1 转移失败
         """
 
         if state < 1:
@@ -181,18 +208,20 @@ class MutableDoubleArrayTrieInteger:
 
         if isinstance(ids, list):
             for c in ids:
-                if self.getBase(state) + c < self.getBaseArraySize() \
-                        and self.getCheck(self.getBase(state) + c) == state:
-                    state = self.getBase(state) + c
+                toState = self.getBase(state) + c
+                if toState < self.getBaseArraySize() and self.getCheck(toState) == state:
+                    state = toState
                 else:
                     return -1
 
             return state
-
+        
+        # 当 ids 参数实际上是 int 类型的 codePoint 的时候
         ids = self.charMap.toIdList(ids)
         if len(ids) == 0:
             return -1
-
+    
+        # 自调用
         return self.transfer(state, ids)
 
 
@@ -212,7 +241,7 @@ class MutableDoubleArrayTrieInteger:
         """
         assert key != None
         assert 0 <= start and start <= len(key)
-
+        
         state = 1
         ids = self.charMap.toIdList(key[start:])
         state = self.transfer(state, ids)
@@ -339,9 +368,7 @@ class MutableDoubleArrayTrieInteger:
                     if self.getCheck(to) == self.getBase(parent) + c:
                         self.setCheck(to, child)
 
-
             self.addFreeLink(self.getBase(parent) + c)
-
 
         self.setBase(parent, newBase)
 
@@ -378,6 +405,7 @@ class MutableDoubleArrayTrieInteger:
         return oldSize
 
     def getNextFreeBase(self, nextChar) -> int:
+        """为字符找空闲位置在Base数组中"""
         index = -self.getCheck(0)
 
         while index != 0:
@@ -391,3 +419,16 @@ class MutableDoubleArrayTrieInteger:
         self.expandArray(oldSize + 10240)
 
         return oldSize
+
+
+
+    def save(self, out):
+        """保存模型参数"""
+        out.append(self.size)
+        
+        for b in self.base:
+            out.append(b)
+
+        for c in self.check:
+            out.append(c)
+
