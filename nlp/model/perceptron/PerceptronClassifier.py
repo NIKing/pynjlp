@@ -112,7 +112,7 @@ class PerceptronClassifier(ABC):
         instanceList = []
         lineIterator = pd.read_csv(corpus).loc[:,[True, True]].values
         
-        lineIterator = lineIterator[:2]
+        #lineIterator = lineIterator[:2]
         print(f'训练条目总数:{len(lineIterator)}')
         for line in lineIterator:
             text, label = line

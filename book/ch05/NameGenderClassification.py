@@ -42,7 +42,7 @@ def test_name(classifier):
 
 def trainAndEvaluate(template, classifier, averagePerceptron):
     base_path = '/pynjlp/data/test/cnname/'
-    training_set =  base_path + 'train.csv'
+    training_set =  base_path + 'train_small.csv'
     testing_set  =  base_path + 'test.csv'
     model_path   =  base_path + 'cnname.bin'
     

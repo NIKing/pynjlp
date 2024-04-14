@@ -109,4 +109,5 @@ class Utf8CharacterMapping():
 
     def toString(self, ids) -> str:
         """int 转换 utf8字符串"""
-
+        byte_string = bytes(ids)
+        return byte_string.decode('utf-8')

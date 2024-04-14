@@ -27,6 +27,8 @@ class MutableDoubleArrayTrieInteger:
 
         self.charMap = charMap if charMap != None else Utf8CharacterMapping()
 
+        self.clear()
+
         if stringIntegerMap != None and entrySet == None:
             entrySet = stringIntegerMap.entrySet()
 
@@ -34,13 +36,12 @@ class MutableDoubleArrayTrieInteger:
             for entry in entrySet:
                 self.put(entry.getKey(), entry.getValue())
 
-        self.clear()
 
     def entrySet(self):
         pair = KeyValuePair(self)
 
-        #for s in range(self.size):
-        for s in range(2):
+        for s in range(self.size):
+        #for s in range(2):
             print('+++++++++++')
             yield pair.next() 
 
