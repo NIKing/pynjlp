@@ -5,7 +5,7 @@ from nlp.collection.trie.datrie.MutableDoubleArrayTrieInteger import MutableDoub
 
 from nlp.algorithm.MaxHeap import MaxHeap
 from nlp.utility.MathUtility import MathUtility
-from nlp.corpus.io.IOUtil import writeListToBin
+from nlp.corpus.io.IOUtil import writeListToBin, writeTxtByList
 
 """线性模型-基础模型"""
 class LinearModel():
@@ -64,7 +64,7 @@ class LinearModel():
         #self.compress(ratio, 1e-3)
         
         # 保存到二进制
-        #self.saveToBin(modelFile)
+        self.saveToBin(modelFile)
         
         # 保存到文本
         if not text:
@@ -83,8 +83,11 @@ class LinearModel():
         
         # 保存特征映射值和特征权重
         out = []
-
+        
+        # 保存双数组
         self.featureMap.save(out)
+
+        # 保存权重参数, 数组的位置代表特征映射，位置中的值表示权重
         for aParameter in self.parameter:
             out.append(aParameter)
         
@@ -100,24 +103,24 @@ class LinearModel():
         
         for entry in featureIdSet:
             #print(entry.getKey(), entry.getValue())
-
+            
+            pair = []
             bw.append(entry.getKey())
-
+            
+            values = []
             if entry.size() == len(self.parameter):
-                bw.append('\t')
-                bw.append(self.parameter[entry.getValue()])
+                values = str(self.parameter[entry.getValue()])
             else:
-                for i in range(len(tagset)):
-                    bw.append('\t')
-                    bw.append(self.parameter[entry.getValue() * tagSet.size() + i])
+                for i in range(len(tagSet)):
+                    values.append(str(self.parameter[entry.getValue() * tagSet.size() + i]))
+            
+            bw.append(''.join(''.join(values)))
 
-            bw.append('\r')
-
-
-        print(bw)
+        writeTxtByList(modelFile + '.txt', bw)
     
     def compress(self, ratio = 0, threshold = 1e-3):
         """
+        压缩权重参数空间和双数组空间
         -param ratio 压缩比c（压缩掉的体积，压缩后体积变成1-c）
         -param threshold 特征权重绝对值之和最低阈值
         """

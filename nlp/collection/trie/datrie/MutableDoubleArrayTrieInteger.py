@@ -39,10 +39,9 @@ class MutableDoubleArrayTrieInteger:
 
     def entrySet(self):
         pair = KeyValuePair(self)
-
+        
         for s in range(self.size):
-        #for s in range(2):
-            print('+++++++++++')
+        #for s in range(3):
             yield pair.next() 
 
     def clear(self):
@@ -52,7 +51,6 @@ class MutableDoubleArrayTrieInteger:
         self.base.append(0)
         self.check.append(0)
         
-        # ???
         self.base.append(1)
         self.check.append(0)
 
@@ -109,10 +107,10 @@ class MutableDoubleArrayTrieInteger:
         if value < 0 or (value & self.LEAF_BIT) != 0:
             return False
         
-        print('insert', key, value)
+        #print('insert', key, value)
         value = self.setLeafValue(value)
         ids = self.charMap.toIdList(key + self.UNUSED_CHAR)     # 一串字符将变成UTF-8类型的字符数组, eg: 珍 = b'\xe7\x8f\x8d\x00'
-        print('change:', value, ids, f'ids_0={ids[0]}')
+        #print('change:', value, ids, f'ids_0={ids[0]}')
         
         # 根节点（fromState = 1)
         fromState, toState, index = 1, 1, 0
@@ -121,9 +119,9 @@ class MutableDoubleArrayTrieInteger:
             toState = self.getBase(fromState) + c   # to = base[from] + c
             self.expandArray(toState)
             
-            print(f'b={fromState}')
-            print(f'begin={self.getBase(fromState)}', f'c={c}')
-            print(f'p={toState}')
+            #print(f'b={fromState}')
+            #print(f'begin={self.getBase(fromState)}', f'c={c}')
+            #print(f'p={toState}')
             #print(f'check={self.getCheck(toState)}')
             
             # 前后字符没有建立父子关系
@@ -132,29 +130,29 @@ class MutableDoubleArrayTrieInteger:
                 
                 # 建立转移成功条件, 给当前节点建立父
                 self.setCheck(toState, fromState) # check[to] = from
-                print(f'to_check={toState}, value={fromState}')
+                #print(f'to_check={toState}, value={fromState}')
                 
                 # 最后一个子节点，设置值
                 if index == len(ids) - 1:   
                     self.size += 1          # 代表一组字典添加成功
                     self.setBase(toState, value)
-                    print(f'to_base={toState}, value={value}')
+                    #print(f'to_base={toState}, value={value}')
                 else:
                     # 建立父子关系, 把子节点挂在当前当节点上
                     nextChar = ids[(index + 1)]
                     self.setBase(toState, self.getNextFreeBase(nextChar))   # base[to] = free_state - c
-                    print(f'to_base={toState}, value={self.getNextFreeBase(nextChar)}')
+                    #print(f'to_base={toState}, value={self.getNextFreeBase(nextChar)}')
             
             # 若建立的关系与父级不同，则进行修正
             elif self.getCheck(toState) != fromState:
-                print('solveConf')
+                #print('solveConf')
                 self.solveConflict(fromState, c)
                 continue
 
             fromState = toState
             index += 1
             
-            print('----------')
+            #print('----------')
         
         # 覆盖最后转移字符的值，不管是否字符串中最后一个字符（默认最后一个字符应该是 000)
         if overwrite:

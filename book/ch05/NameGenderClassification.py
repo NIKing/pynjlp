@@ -12,7 +12,6 @@ class CheapFeatureClassifier(PerceptronNameGenderClassifier):
         # 特征函数，获取姓名中的名字
         givenName = self.extractGivenName(text)
         
-        print('名字:', givenName)
         # 特征模版，g[0], g[1] 与位置无关
         self.addFeature(givenName[:1], featureMap, featureList)
         self.addFeature(givenName[1:], featureMap, featureList)
@@ -43,6 +42,8 @@ def test_name(classifier):
 def trainAndEvaluate(template, classifier, averagePerceptron):
     base_path = '/pynjlp/data/test/cnname/'
     training_set =  base_path + 'train_small.csv'
+
+    #training_set =  base_path + 'train.csv'
     testing_set  =  base_path + 'test.csv'
     model_path   =  base_path + 'cnname.bin'
     

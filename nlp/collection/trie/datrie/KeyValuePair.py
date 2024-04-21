@@ -91,15 +91,15 @@ class KeyValuePair:
         
         # index 记录迭代次数
         if self.index != 0:
-            print('path', self.path, self.index)
+            #print('path', self.path, self.index)
             while len(self.path) > 0:
                 charPoint = self.path.pop()
                 base = self.path[-1]
                 n = self.getNext(base, charPoint)
 
-                print('n', n)
-                print(f'{charPoint}到{base}转移失败')
-                print('')
+                #print('n', n)
+                #print(f'{charPoint}到{base}转移失败')
+                #print('')
                 
                 if n != -1:
                     break
@@ -120,25 +120,29 @@ class KeyValuePair:
         startChar  = charPoint + 1 # 为什么加1？？？若不加1，charPoint = 0的会造成转移成功得到0的check值超出双数组索引
         baseParent = self.dat.base[parent] # 以charPoint为当前节点，获取父级的base值，实际也是当前节点的begin值
         from_ = parent
-
-        print(f'父级字符在编码的位置={parent}', f'当前字符={charPoint}')
-        print(f'父级的base值={baseParent}', f'startChar={startChar}')
+        
+        #print(f'getNext()----------------------------')
+        #print(f'父级字符在编码的位置={parent}', f'当前字符={charPoint}')
+        #print(f'父级的base值={baseParent}', f'startChar={startChar}')
 
         for i in range(startChar, self.dat.charMap.getCharsetSize()):
             
             # baseParent 是父节点的base值
             # 因为在insert的时候，父节点的base值实际上是当前节点的begin值，因此to_是当前节点的begin值 + 字符编码 = 新的位置
             to_ = baseParent + i 
-            
-            #print('')
-            #print(f'迭代索引={i}',  f'begin={to_}')
-            #print(f'当前节点check[{to_}]={self.dat.check[to_]}', f'父节点的位置={from_}')
+      
             
             # 在insert的时候，当前节点的 check 值是父节点的 p 值
             # 试图在check中找到与父节点的 p (from_) 相等的位置，就转移成功
             if len(self.dat.check) > to_ and self.dat.check[to_] == from_:
-                print(f'{from_}到{to_}转移成功', self.path)
-                print(' ')
+                      
+                #print('')
+                #print(f'迭代索引={i}',  f'begin={to_}')
+                #print(f'当前节点check[{to_}]={self.dat.check[to_]}', f'父节点的位置={from_}')
+                #print('')
+
+                #print(f'{from_}到{to_}转移成功, path = {self.path}')
+                #print(' ')
                 
                 # 注意在from_已经发生了改变，变成了之前子节点的位置
                 from_ = to_
@@ -149,11 +153,11 @@ class KeyValuePair:
                 # 父节点的base值，同时也是当前节点的begin
                 baseParent = self.dat.base[from_]
                 
-                # 最后一个字符
-                print(f'baseParent={baseParent}', f'unused={self.dat.UNUSED_CHAR_VALUE}')
-                print(f'from={from_}', f'check_val={self.dat.getCheck(baseParent + self.dat.UNUSED_CHAR_VALUE)}')
-                print(' ')
+                #print(f'baseParent={baseParent}', f'unused={self.dat.UNUSED_CHAR_VALUE}')
+                #print(f'from={from_}', f'check_val={self.dat.getCheck(baseParent + self.dat.UNUSED_CHAR_VALUE)}')
+                #print(' ')
                 
+                # 最后一个字符
                 # 上面的判断更像是找到一个满足转移的条件，因为 to_ 的值会不断发生变化，直到能找到一个utf-8的字符满足转移条件
                 # 当前判断找到的utf-8的字符是否是结束字符，所有结束字符都是以 0 结尾，因此baseParent只是begin值，不用加上编码
                 # 父节点的base值+结束编码 = 父节点
