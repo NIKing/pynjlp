@@ -3,7 +3,6 @@ from nlp.collection.trie.datrie.MutableDoubleArrayTrieInteger import MutableDoub
 
 """用MutableDoubleArrayTrie实现的ImmutableFeatureMap"""
 class ImmutableFeatureMDatMap(FeatureMap):
-
     def __init__(self, dat = None, tagSet = None, featureIdMap = None, featureIdSet = None):
         super().__init__(tagSet)
         
@@ -23,7 +22,7 @@ class ImmutableFeatureMDatMap(FeatureMap):
     def idOf(self, string):
         return self.dat.get(string)
 
-    def size(self) -> int:
+    def getSize(self) -> int:
         return self.dat.size
 
     def entrySet(self):
@@ -31,5 +30,19 @@ class ImmutableFeatureMDatMap(FeatureMap):
 
     def save(self, out):
         """保存模型参数"""
+        
+        # 保存标签分类
         self.tagSet.save(out)
+        
+        # 保存双数组字典树
         self.dat.save(out)
+
+    def load(self, byteArray):
+        """加载模型"""
+
+        # 加载分类标签
+        super().loadTagSet(byteArray)
+
+        # 加载双数组字典树
+        return self.dat.load(byteArray)
+

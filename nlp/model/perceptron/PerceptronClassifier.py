@@ -25,13 +25,13 @@ class Instance():
 class PerceptronClassifier(ABC):
     def __init__(self, model = None):
 
+        if isinstance(model, str):
+            model = LinearModel(modelFile = model)
+
         if model != None and model.taskType() != TaskType.CLASSIFICATION:
             return "模型不是分类模型"
         
-        if isinstance(model, str):
-            self.model = LinearModel(modelFile = model)
-        else:
-            self.model = model
+        self.model = model
 
 
     def train(self, corpus, maxIteration = 2, averagePerceptron = True):

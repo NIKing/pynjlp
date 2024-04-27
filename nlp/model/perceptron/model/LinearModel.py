@@ -1,11 +1,15 @@
 from nlp.model.perceptron.feature.ImmutableFeatureMDatMap import ImmutableFeatureMDatMap
 from nlp.model.perceptron.feature.FeatureSortItem import FeatureSortItem
 
+from nlp.model.perceptron.common.TaskType import TaskType
+
 from nlp.collection.trie.datrie.MutableDoubleArrayTrieInteger import MutableDoubleArrayTrieInteger
 
 from nlp.algorithm.MaxHeap import MaxHeap
 from nlp.utility.MathUtility import MathUtility
+
 from nlp.corpus.io.IOUtil import writeListToBin, writeTxtByList
+from nlp.corpus.io.ByteArrayStream import ByteArrayStream
 
 """线性模型-基础模型"""
 class LinearModel():
@@ -74,7 +78,6 @@ class LinearModel():
             featureIdSet = self.featureMap.entrySet()
     
         self.saveToText(modelFile, featureIdSet)
-
 
     def saveToBin(self, modelFile):
         """保存模型二进制数据到.bin"""
@@ -181,15 +184,31 @@ class LinearModel():
         self.parameter  = parameter
 
         return self
+    
+    def load(self, modelFile):
+        if not modelFile:
+            return 
+        
+        # 读取模型
+        byteArray = ByteArrayStream(modelFile)
+        
+        # 初始化特征映射对象
+        self.featureMap = ImmutableFeatureMDatMap()
+        self.featureMap.load(byteArray)
+        
+        size = self.featureMap.getSize()
+        tagSet = self.featureMap.tagSet
+        
+        # 加载特征值
+        if tagSet.taskType == TaskType.CLASSIFICATION:
+            parameter = byteArray.next(count = size)
 
+        else:
+            paramter = [0.0] * (size * tagSet.size())
+            for i in range(size):
+                for j in range(tagSet.size()):
+                    parameter[i * tagSet.size() + j] = byteArray.next()
+        
+        self.parameter = parameter
 
-
-
-
-
-
-
-
-
-
-
+        

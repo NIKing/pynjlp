@@ -21,11 +21,6 @@ class TagSet:
             self.idStringMap.append(tag)
 
         return id
-    
-    def lock(self):
-        self.allTags = [0] * self.size()
-        for i in range(self.size()):
-            self.allTags[i] = i
 
     def size(self):
         return len(self.stringIdMap)
@@ -46,5 +41,20 @@ class TagSet:
         out.append(self.size())
 
         for tag in self.idStringMap:
-            out.append(tag.encode('utf-8'))
+            out.append(tag)
+    
+    def load(self, byteArray):
+        size = byteArray.next()
         
+        for i in range(size):
+            tag = byteArray.next()
+            
+            self.idStringMap.append(tag)
+            self.stringIdMap[tag] = i
+
+        self.lock()
+    
+    def lock(self):
+        self.allTags = [0] * self.size()
+        for i in range(self.size()):
+            self.allTags[i] = i

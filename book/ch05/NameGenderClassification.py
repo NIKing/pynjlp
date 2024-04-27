@@ -39,11 +39,11 @@ def test_name(classifier):
         res = classifier.predict(name)
         print('%s=%s' % (name, res))
 
+base_path = '/pynjlp/data/test/cnname/'
 def trainAndEvaluate(template, classifier, averagePerceptron):
-    base_path = '/pynjlp/data/test/cnname/'
     training_set =  base_path + 'train_small.csv'
-
     #training_set =  base_path + 'train.csv'
+    
     testing_set  =  base_path + 'test.csv'
     model_path   =  base_path + 'cnname.bin'
     
@@ -53,10 +53,25 @@ def trainAndEvaluate(template, classifier, averagePerceptron):
     model = classifier.getModel()
     print(f'特征数量：{len(model.parameter)}')
     
-    #test_accuracy = classifier.evaluate(testing_set)
-    #print(f'测试集准确率：{test_accuracy}')
-
+    test_accuracy = classifier.evaluate(testing_set)
+    print(f'测试集准确率：{test_accuracy}')
+    
+    # 保存模型
     model.save(model_path, None, 0, True)
+    #test_name(classifier)
+
+def load_and_evaluate():
+    model_path = base_path + 'cnname.bin'
+    classifier = CheapFeatureClassifier(model_path)
+
+    model = classifier.getModel()
+    print(f'特征数量：{len(model.parameter)}')
+
+    model.load(model_path)
+
+    test_path = base_path + 'test.csv'
+    test_accuracy = classifier.evaluate(test_path)
+    print(f'测试集准确率：{test_accuracy}')
 
     #test_name(classifier)
 
@@ -70,3 +85,5 @@ if __name__ == '__main__':
 
     #trainAndEvaluate("复杂的特征模版", RichFeatureClassifier(), False)
     #trainAndEvaluate("复杂的特征模版", RichFeatureClassifier(, True)
+
+    #load_and_evaluate()

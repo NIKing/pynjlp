@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pickle
 
 from nlp.corpus.document.sentence.Sentence import Sentence
 
@@ -93,11 +94,20 @@ def loadInstance(path):
 
     return sentenceList
 
-
 def writeListToBin(path, listData):
     """保存list数据到.bin文件"""
-    float_array = np.array(listData)
-    
+    array = np.array(listData, dtype=object)
+
     with open(path, 'wb') as f:
-        f.write(float_array.tobytes())
+        f.write(pickle.dumps(array))
+
+def readBinToList(path):
+    """读取bin文件""" 
+    arr_bytes = []
+    
+    with open(path, 'rb') as f:
+        arr_bytes = f.read()
+        arr_bytes = pickle.loads(arr_bytes)
+
+    return arr_bytes
 

@@ -41,7 +41,6 @@ class MutableDoubleArrayTrieInteger:
         pair = KeyValuePair(self)
         
         for s in range(self.size):
-        #for s in range(3):
             yield pair.next() 
 
     def clear(self):
@@ -419,15 +418,27 @@ class MutableDoubleArrayTrieInteger:
 
         return oldSize
 
-
-
     def save(self, out):
         """保存模型参数"""
-        out.append(self.size)
         
-        for b in self.base:
-            out.append(b)
+        # 保存键值对的数量
+        out.append(self.size)
 
-        for c in self.check:
-            out.append(c)
+        # 保存双数组的长度
+        out.append(self.getBaseArraySize())
+        
+        # 保存双数组
+        out.extend(self.base)
+        out.extend(self.check)
 
+    def load(self, byteArray):
+        """加载模型"""
+        
+        self.size = byteArray.next()
+        
+        # 获取双双数组长度
+        array_size = byteArray.next()
+
+        self.base = byteArray.next(count = array_size)
+        self.check = byteArray.next(count = array_size) 
+   
