@@ -34,7 +34,7 @@ class PerceptronClassifier(ABC):
         self.model = model
 
 
-    def train(self, corpus, maxIteration = 2, averagePerceptron = True):
+    def train(self, corpus, maxIteration = 1, averagePerceptron = True):
         """
         感知机训练器
         -param corpus 语料库
@@ -69,6 +69,7 @@ class PerceptronClassifier(ABC):
         """
         model = LinearModel(featureMap, [0.0] * len(featureMap))
         for it in range(maxIteration):
+            print(f'迭代了{it}次')
             for instance in instanceList:
                 y = model.decode(instance.x)
 

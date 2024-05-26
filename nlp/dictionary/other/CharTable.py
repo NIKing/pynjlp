@@ -61,7 +61,6 @@ class CharTable:
 
     @staticmethod 
     def load_by_map(path = ''):
-        
         # 把所有unicode字符放在映射表商
         for c in range(0, 0x10FFFF + 1):
             c = chr(c)
@@ -76,15 +75,30 @@ class CharTable:
                 continue
             
             CharTable.MAP[line[0]] = line[2]
-
+    
     @staticmethod
-    def convert(string) -> list:
+    def convert_by_str(string) -> list:
         if len(string) == 1:
-            #return CharTable.CONVERT[CharTable.CONVERT.index(c)]
             return CharTable.MAP[string]
 
         return ''.join([CharTable.MAP[s] for s in string])
-    
+
+    @staticmethod
+    def convert(string) -> list:
+        if isinstance(string, str):
+            return CharTable.convert_by_str(string)
+        
+        return []
+
+    @staticmethod
+    def normalization(sentence = str) -> str:
+        if len(sentence) <= 0:
+            return sentence
+        
+        sentences = CharTable.convert(sentence)
+        return ''.join(sentences)
+        
+
 
 
 CharTable.load_by_map(NLPConfig.CharTablePath)

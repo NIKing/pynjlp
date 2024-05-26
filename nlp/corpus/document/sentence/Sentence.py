@@ -7,7 +7,16 @@ from nlp.corpus.document.sentence.word.Word import Word
 class Sentence:
     def __init__(self, wordList = []):
         self.wordList = wordList
+
+        self.offset = 0
     
+    def __len__(self):
+        return len(self.wordList)
+
+    def __iter__(self):
+        for word in self.wordList:
+            yield word
+
     @staticmethod
     def create(param):
         if not param:

@@ -10,11 +10,15 @@ class ImmutableFeatureMDatMap(FeatureMap):
             self.dat = dat
             return
        
-        self.dat = MutableDoubleArrayTrieInteger(featureIdMap)
+        self.dat = MutableDoubleArrayTrieInteger(entrySet = featureIdMap)
         
+        # 到这里已经是字典了，我尝试更换字典获取数据的方法
         if featureIdSet != None:
             for entry in featureIdSet:
-                self.dat.put(entry.getKey(), entry.getValue())
+                #self.dat.put(entry.getKey(), entry.getValue())
+                
+                # 更换字典获取数据方法 -- 2024年5月22日
+                self.dat.put(entry[0], entry[1])
     
     def __len__(self):
         return self.dat.size

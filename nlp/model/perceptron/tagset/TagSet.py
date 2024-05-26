@@ -8,6 +8,12 @@ class TagSet:
         self.idStringMap = []
         self.allTags = []
 
+    def __len__(self):
+        return len(self.stringIdMap)
+
+    def __getitem__(self, i):
+        return self.idStringMap[i]
+
     def add(self, tag) -> int:
         """
         1，获取标签的编号
@@ -35,6 +41,9 @@ class TagSet:
 
         return id
 
+    def getAllTags(self):
+        return self.allTags
+
     def save(self, out):
         """保存标记类别序号、标记大小和标记内容"""
         out.append(list(TaskType).index(self.taskType))
@@ -54,6 +63,9 @@ class TagSet:
 
         self.lock()
     
+    def bosId(self):
+        return self.size()
+
     def lock(self):
         self.allTags = [0] * self.size()
         for i in range(self.size()):

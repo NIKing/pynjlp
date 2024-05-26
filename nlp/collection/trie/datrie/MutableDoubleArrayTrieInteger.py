@@ -31,11 +31,14 @@ class MutableDoubleArrayTrieInteger:
 
         if stringIntegerMap != None and entrySet == None:
             entrySet = stringIntegerMap.entrySet()
-
+        
+        # 到这里已经是字典了，我尝试更换字典获取数据的方法
         if entrySet != None:
             for entry in entrySet:
-                self.put(entry.getKey(), entry.getValue())
+                #self.put(entry.getKey(), entry.getValue())
 
+                # 更换字典获取数据方法 -- 2024年5月22日
+                self.put(entry[0], entry[1])
 
     def entrySet(self):
         pair = KeyValuePair(self)

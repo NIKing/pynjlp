@@ -25,7 +25,7 @@ class RichFeatureClassifier(PerceptronNameGenderClassifier):
         featureList = []
         
         # 特征函数
-        givenName = self.extranctGivenName(text)
+        givenName = self.extractGivenName(text)
 
         # 特征模版
         self.addFeature("1" + givenName[:1], featureMap, featureList)
@@ -47,11 +47,12 @@ def trainAndEvaluate(template, classifier, averagePerceptron):
     testing_set  =  base_path + 'test.csv'
     model_path   =  base_path + 'cnname.bin'
     
-    accuracy = classifier.train(training_set, 10, averagePerceptron)
+    accuracy = classifier.train(training_set, 7, averagePerceptron)
     print(f'训练集准确率：{accuracy}')
 
     model = classifier.getModel()
     print(f'特征数量：{len(model.parameter)}')
+    print(model.parameter)
     
     test_accuracy = classifier.evaluate(testing_set)
     print(f'测试集准确率：{test_accuracy}')

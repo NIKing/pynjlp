@@ -97,7 +97,7 @@ def loadInstance(path):
 def writeListToBin(path, listData):
     """保存list数据到.bin文件"""
     array = np.array(listData, dtype=object)
-
+    
     with open(path, 'wb') as f:
         f.write(pickle.dumps(array))
 
