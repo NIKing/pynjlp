@@ -312,7 +312,7 @@ class LinearModel():
         return 当前字符属于某个标签（状态）下的特征向量的累积分数 
         """
         score = 0
-        for index in range(len(featureVector)):
+        for index in featureVector:
             if index == -1:
                 continue
 
