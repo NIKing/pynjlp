@@ -1,12 +1,11 @@
-
-"""
-也是最短路分词，最短路求解采用Viterbi算法
-"""
 from nlp.seg.WordBasedSegment import WordBasedSegment
 from nlp.seg.Config import Config
 
 from nlp.seg.common.WordNet import WordNet
 
+"""
+也是最短路分词，最短路求解采用Viterbi算法
+"""
 class ViterbiSegment(WordBasedSegment):
     
     def __init__(self):

@@ -1,10 +1,13 @@
 class NLPConfig:
     
+    # 停用词典路径
+    CoreStopWordDictionaryPath = '/pynjlp/data/dictionary/stopwords.txt'
+
     # 核心词典路径
     CoreDictionaryPath = '/pynjlp/data/dictionary/CoreNatureDictionary.mini.txt'
     
     # 二元语法词典路径
-    BiGramDictionaryPath = "/pynjlp/data/dictionary/CoreNatureDictionary.ngram.txt"
+    BiGramDictionaryPath = "/pynjlp/data/dictionary/CoreNatureDictionary.ngram.mini.txt"
 
     # 用户自定义词典路径
     CustomDictionaryPath = ['/pynjlp/data/dictionary/custom/CustomDictionary.txt']

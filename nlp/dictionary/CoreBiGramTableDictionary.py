@@ -125,7 +125,6 @@ class CoreBiGramTableDictionary():
         if idB < 0:
             return 0
         
-        
         # 在 [self.start[idA], self.start[idA + 1] - self.start[idA]] 区间内使用二分法查找第二单词编号
         # 之所以需要使用区间查询，是因为在pair中存放的第二单词会是重复的，比如“商品@和”以及“服务@和”第一单词不同但是第二单词相同。
         # self.start[idA] 实际上保存的是上一个单词的offset值
