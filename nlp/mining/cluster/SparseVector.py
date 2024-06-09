@@ -98,3 +98,6 @@ class SparseVector():
         result = prod / (norm1 * norm2)
         
         return result
+
+    def toString(self):
+        return ','.join([str(key) +"="+ str(val) for key, val in self.map.items()])

@@ -22,6 +22,7 @@ class Cluster():
         return self.documents
 
     def add_document(self, doc):
+        """注意在这里对文档的向量进行了归一化处理"""
         doc.feature().normalize()
         
         self.documents.append(doc)
@@ -111,6 +112,10 @@ class Cluster():
         potential, closest = 0.0, []
         for i in range(len(self.documents)):
             dist = 1.0 - SparseVector.inner_product(self.documents[i].feature(), self.documents[index].feature())
+            #print(f'{i}', self.documents[i].feature().toString())
+            #print('dist', dist)
+            #print(' ')
+
             potential += dist
             closest.append(dist)
 
@@ -133,7 +138,8 @@ class Cluster():
             docs.append(self.documents[index])
             count += 1
             
-            # index 发生了改变，需要重新计算每个文档与质心的举例
+            # index 发生了改变，需要重新计算每个文档与质心的距离
+            # 特别注意，这里会把文档之前的准则数与新质心之间的准则数进行对比，保留最小值
             new_potential = 0.0
             for i in range(len(self.documents)):
                 dist = 1.0 - SparseVector.inner_product(self.documents[i].feature(), self.documents[index].feature())

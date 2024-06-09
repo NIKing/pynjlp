@@ -63,6 +63,7 @@ class ClusterAnalyzer():
         return id
 
     def toVector(self, wordList):
+        """将文档转换向量，以双数组字典树为基础建立特征索引，以词频建立特征值"""
         vector = SparseVector()
 
         for word in wordList:
@@ -183,7 +184,7 @@ class ClusterAnalyzer():
         return 准则函数的值
         """
         
-        # 计算簇内所有文档向量长度(标量)
+        # 计算簇的质心(标量，合成向量的范数)
         norms = []
         for cluster in clusters:
             norms.append(cluster.composite_vector().norm())
@@ -210,11 +211,11 @@ class ClusterAnalyzer():
 
                 doc = cluster.documents[item_id]
                 
-                # 计算两个向量的相似性(标量)(负相关), composite_vector 是复合向量，一个簇内所有文档特征都包含在内
+                # 计算目标文档从其所属簇移除后的向量变化, composite_vector 是复合向量，一个簇内所有文档特征都包含在内
                 value_base = self.refine_vector_value(cluster.composite_vector(), doc.feature(), -1)
                 
                 # 最终获得是当前簇内所有文档向量(复合向量)的范数，即doc在当前簇的增量
-                # 当前簇(复合向量)范数值的平方 + 当前文档与簇（复合向量）相似度，后开平方
+                # 当前簇质心的平方 + 当前文档与簇（复合向量）相似度，后开平方
                 norm_base_moved = math.pow(norms[cluster_id], 2) + value_base
                 norm_base_moved = math.sqrt(norm_base_moved) if norm_base_moved > 0 else 0.0
                 
@@ -224,12 +225,13 @@ class ClusterAnalyzer():
                     if cluster_id == j:
                         continue
 
-                    # 计算两个向量的相似性(标量)(正相关), composite_vector 是复合向量，一个簇内所有文档特征都包含在内
+                    # 计算目标文档移动到新的簇的增幅, composite_vector 是复合向量，一个簇内所有文档特征都包含在内
                     value_target = self.refine_vector_value(other.composite_vector(), doc.feature(), 1)
                     
                     norm_target_moved = math.pow(norms[j], 2) + value_target
                     norm_target_moved = math.sqrt(norm_target_moved) if norm_base_moved > 0 else 0.0
-
+                    
+                    # 增幅计算
                     eval_moved = norm_base_moved + norm_target_moved - norms[cluster_id] - norms[j]
                     if eval_max < eval_moved:
                         eval_max = eval_moved
@@ -263,11 +265,10 @@ class ClusterAnalyzer():
     def refine_vector_value(self, composite, vec, sign) -> float:
         """
         改善向量的值, c^2 - 2c(a + c) + d^2 - 2d(b + d)
-        解读：
+        下面的代码，实现了 c^2 - 2c(a+c) ，并且进行了向量的累加 ：
             1，a + c 是复合向量中的一个数据，这是代表复合向量实际上是其他多个向量相加而得到的
-            2，下面的代码，实现了 c^2 - 2c(a+c) ，并且进行了向量的累加
-            3，c^2 表示文档向量的欧几里得长度
-            4，2c(a+c) 表示向量的加权内积，两个向量的相似性
+            2，c^2 表示文档向量的欧几里得长度
+            3，2c(a+c) 表示两个向量的加权内积，两个向量的相似性
 
         -param composite 复合向量 (a + c, b + d)
         -param vec 文档向量 (c, d)
