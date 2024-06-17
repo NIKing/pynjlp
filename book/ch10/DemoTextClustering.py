@@ -24,10 +24,10 @@ def preprocess(word):
 
     print(wordList)
 
-from nlp.mining.cluster.ClusterAnalyzer import ClusterAnalyzer
+from nlp.mining.cluster.DocumentClusterAnalyzer import DocumentClusterAnalyzer
 
 def analyzer_by_myself():
-    analyzer = ClusterAnalyzer()
+    analyzer = DocumentClusterAnalyzer()
     words_list = [
         ["肝脏", "未", "分化", "肉瘤", "胚胎", "型"],
         ["nk", "t", "细胞", "淋巴瘤"],

@@ -1,8 +1,10 @@
 import re
-import sys
-sys.path.append('/pynjlp')
+#import sys
+#sys.path.append('/pynjlp')
 
 from nlp.corpus.document.sentence.word.Word import Word
+from nlp.corpus.document.sentence.word.WordFactory import WordFactory
+from nlp.corpus.document.sentence.word.CompoundWord import CompoundWord
 
 class Sentence:
     def __init__(self, wordList = []):
@@ -35,7 +37,7 @@ class Sentence:
         if matcher:
             for single in matcher.group():
                 single = matcher.group()
-                word = Word(single)
+                word = WordFactory.create(single)
 
                 if not word:
                     print(f'在用【{single}】构造句子失败')
@@ -51,5 +53,15 @@ class Sentence:
         return Sentence(wordList)
 
 
+    def toSimpleWordList(self) -> list:
+        wordList = []
+
+        for word in self.wordList:
+            if isinstance(word, CompoundWord):
+                wordList.extend(word.innerList)
+            else:
+                wordList.append(word)
+
+        return wordList
 
 

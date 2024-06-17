@@ -23,3 +23,12 @@ class NLPConfig:
 
     # 词性标注集描述表，用来进行中英映射（对于Nature词性，可直接参考Nature.java中的注释）
     PartOfSpeechTagDictionary = "/pynjlp/data/dictionary/other/TagPKU98.csv"
+
+    # CRF分词模型
+    CRFCWSModelPath = "/pynjlp/data/model/crf/pku199801/cws.txt.bin"
+
+    # CRF词性模型
+    CRFPOSModelPath = "/pynjlp/data/model/crf/pku199801/pos.txt.bin"
+
+    # CRF命名实体识别模型
+    CRFPOSModelPath = "/pynjlp/data/model/crf/pku199801/ner.txt.bin"

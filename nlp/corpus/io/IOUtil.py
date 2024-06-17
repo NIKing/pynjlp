@@ -2,6 +2,9 @@ import os
 import numpy as np
 import pickle
 
+import pandas as pd
+import xlsxwriter
+
 from nlp.corpus.document.sentence.Sentence import Sentence
 
 def loadDictionary(path, splitter = '\t', defaultNature = None):
@@ -111,3 +114,29 @@ def readBinToList(path):
 
     return arr_bytes
 
+def toExcel(path, data, columns):
+    """
+    写入数据到文件
+    :param data 保存的源数据
+    :param columns 数据的列项
+    :param path 保存的文件名称
+    """
+    if not data or not path:
+        return
+
+    data_frame = pd.DataFrame(data, columns = columns)
+    data_frame.to_excel(path, engine='xlsxwriter', index=False)
+
+def readExcel(path, columns) -> list:
+    """
+    读取excel文件
+    -param path 读取路径
+    -param columns 需要读取的文件列
+    return list
+    """
+    if not path or not columns:
+        return []
+
+    data = pd.read_excel(path, keep_default_na=False).loc[:,columns].values
+
+    return data

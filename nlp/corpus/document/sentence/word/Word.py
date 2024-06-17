@@ -1,5 +1,4 @@
 class Word:
-
     def __init__(self, value = None, label = None):
         self.value = value
         self.label = label
@@ -24,3 +23,21 @@ class Word:
 
     def length():
         return len(self.vlaue)
+
+    @staticmethod
+    def create(param):
+        """
+        通过一个参数构建一个单词
+        -param param 比如 人民网/nz
+        return 一个单词
+        """
+        if not param:
+            return None
+
+        cutIndex = param.rfind('/')
+        if cutIndex == -1 or cutIndex == len(param) - 1:
+            print(f'使用参数{param}构建Word失败')
+            return
+
+        return Word(param[:cutIndex], param[(cutIndex + 1):])
+

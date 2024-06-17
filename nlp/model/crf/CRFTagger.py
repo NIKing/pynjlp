@@ -1,14 +1,23 @@
+import time
+from abc import ABC, abstractmethod
+
 from nlp.model.crf.LogLinearModel import LogLinearModel
 
 from nlp.model.crf.crfpp.Encoder import Encoder
 from nlp.model.crf.crfpp.crf_learn import crf_learn
 
-class CRFTagger():
-    def __init__(self, modelPath):
-        if not modelPath:
-            return 
+from nlp.corpus.io.IOUtil import writeTxtByList
 
-        self.model = LogLinearModel(modelPath)
+class CRFTagger(ABC):
+    def __init__(self, modelPath):
+        if not modelPath:       # 训练模式
+            return 
+        
+        self.model = LogLinearModel(modelFile = modelPath)
+
+    @abstractmethod
+    def convertCorpus(self, filePath):
+        pass
 
     def train(self, trainFile, modelFile, templFile = "",
             maxitr = 10000, freq = 1, eta = 0.0001, C = 1.0, threadNum = 1, 
@@ -36,11 +45,33 @@ class CRFTagger():
 
             shrinking_size = crf_learn.shrinking_size
             algorithm = crf_learn.algorithm
+        
+        # 需要在生成模版文件的同时，根据训练数据生成标签集【B,M,E,S】训练数据
+        if not templFile:
+            templateData = self.getDefaultTemplateData()
 
+            fileName  = 'crfpp-template-' + time.strftime("%Y-%m-%d", time.localtime()) + '.txt'
+            templFile = '/pynjlp/data/test/crf-cws-model/' + fileName
+
+            writeTxtByList(templFile, templateData)
+
+            # 生成标签集数据
+            trainData = self.convertCorpus(trainFile)
+            trainData = trainData[:10000]
+
+            trainFileName = 'crfpp-train-' + time.strftime("%Y-%m-%d", time.localtime()) + '.txt'
+            trainFile = '/pynjlp/data/test/crf-cws-model/' + trainFileName
+
+            writeTxtByList(trainFile, trainData)
+        
         encoder = Encoder()
-        if not encoder.learn(tempFile, trainFile, modelFile,
-                True, maxitr, freq, eta, cost, trhead, shrinking_size,
+        if not encoder.learn(templFile, trainFile, modelFile,
+                True, maxitr, freq, eta, cost, thread, shrinking_size,
                 algorithm):
+            
             raise ValueError('fail to learn model')
+
+
+
 
 
