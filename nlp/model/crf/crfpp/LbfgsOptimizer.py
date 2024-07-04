@@ -1,10 +1,11 @@
-# Limited-memory BFGS 无约束最优化算法，只保存最近的M次迭代信息
+import math
+
 from nlp.model.crf.crfpp.Mcsrch import Mcsrch
 
+"""Limited-memory BFGS 无约束最优化算法，只保存最近的M次迭代信息"""
 class LbfgsOptimizer():
 
     def __init__(self):
-        
         self.w = []
         self.v = []
         self.xi   = []
@@ -27,6 +28,30 @@ class LbfgsOptimizer():
         self.maxfev = 0
         self.mcsrch = None
     
+    def clear(self):
+        self.w = None
+        self.v = None
+        self.xi   = None
+        self.diag = None
+        
+        self.stp   = 0.0
+        self.stp1  = 0.0
+
+        self.iflag = 0
+        self.iscn  = 0
+        self.nfev  = 0
+
+        self.iycn  = 0
+        self.point = 0
+        self.npt   = 0
+        self.iter  = 0
+        self.ispt  = 0
+        self.isyt  = 0
+        self.iypt  = 0
+
+        self.maxfev = 0
+        self.mcsrch = None
+
     def pseudo_gradient(self, size, v, x, g, C):
         for i in range(size):
             if x[i] == 0:
@@ -75,10 +100,13 @@ class LbfgsOptimizer():
             self.ispt = size + (msize << 1)
             self.iypt = self.ispt + size * msize
 
-            for i in size:
+            for i in range(size):
                 w[self.ispt + i] = -v[i] * diag[i]
-
-            self.stp1 = 1.0 / math.sqrt(Mcsrch.ddot(size, v, 0, v, 0))
+            
+            try:
+                self.stp1 = 1.0 / math.sqrt(Mcsrch.ddot(size, v, 0, v, 0))
+            except ZeroDivisionError:
+                self.stp1 = float('inf')
 
 
         # main iteration loop
@@ -100,12 +128,21 @@ class LbfgsOptimizer():
                     yy = Mcsrch.ddot(size, w, self.iypt + self.npt, w, self.iypt + self.npt)
 
                     for i in range(size):
-                        diag[i] = ys / yy
+                        try:
+                            diag[i] = ys / yy
+                        except ZeroDivisionError:
+                            if ys < 0 and yy == 0.0:
+                                diag[i] = float("-inf")
+                            elif ys == 0.0 and yy == 0.0:
+                                diag[i] = float('nan')
+                            else:
+                                diag[i] = float('inf')
+
 
 
             if self.iter != 1 and (not firstLoop or (iflag != 1 and not firstLoop)):
-                cp = point
-                if point == 0:
+                cp = self.point
+                if self.point == 0:
                     cp = msize
 
                 w[size + cp - 1] = 1.0 / ys
@@ -115,7 +152,7 @@ class LbfgsOptimizer():
 
                 bound = math.min(self.iter - 1, msize)
 
-                cp = point
+                cp = self.point
                 for i in range(bound):
                     cp -= 1
                     if cp == -1:
@@ -154,7 +191,7 @@ class LbfgsOptimizer():
                 
                 # store the new search direction
                 for i in range(size):
-                    w[ispt + point * size + i] = w[i]
+                    w[self.ispt + self.point * size + i] = w[i]
             
             # obtain the one-dimensional minimizer of the function
             # by using the line search routine Mcsrch
@@ -172,7 +209,7 @@ class LbfgsOptimizer():
             infoArr = [self.info]
             nfevArr = [self.nfev]
 
-            mcsrch.mcsrch(size, x, f, v, w, ispt + point * size, stpArr, infoArr, nfevArr, diag)
+            self.mcsrch.mcsrch(size, x, f, v, w, self.ispt + self.point * size, stpArr, infoArr, nfevArr, diag)
 
             self.stp  = stpArr[0]
             self.info = infoArr[0]
@@ -201,47 +238,24 @@ class LbfgsOptimizer():
                 self.point = 0
 
             gnorm = math.sqrt(Mcsrch.ddot(size, v, 0, v, 0))
-            xnorm = math.max(1.0, math.sqrt(Mcsrch.ddot(size, x, 0, x, 0)))
-
-            if gnorm / xnorm <= Mcsrch.eps:
+            xnorm = max(1.0, math.sqrt(Mcsrch.ddot(size, x, 0, x, 0)))
+            
+            if (gnorm / xnorm) <= Mcsrch.eps:
                 return 0
 
             firstLoop = False
 
 
-    def clear(self):
-        self.w = None
-        self.v = None
-        self.xi   = None
-        self.diag = None
-        
-        self.stp   = 0.0
-        self.stp1  = 0.0
-
-        self.iflag = 0
-        self.iscn  = 0
-        self.nfev  = 0
-
-        self.iycn  = 0
-        self.point = 0
-        self.npt   = 0
-        self.iter  = 0
-        self.ispt  = 0
-        self.isyt  = 0
-        self.iypt  = 0
-
-        self.maxfev = 0
-        self.mcsrch = None
 
     def optimize(self, size, x, f, g, orthant, C):
         """
         优化器
-        -param size int 特征数量
-        -param x    float[] 
-        -param f    float
-        -param g    float[]
-        -param orthant boolean
-        -param C float
+        -param size     int         特征数量大小
+        -param x        float[]     最大特征索引组成的数组 
+        -param f        float
+        -param g        float[]     期望值
+        -param orthant  boolean     是否使用 L1 范数
+        -param C        float       损失值
         """
 
         msize = 5
@@ -255,18 +269,17 @@ class LbfgsOptimizer():
             if orthant:
                 self.xi = [0.0] * size
 
-        elif len(self.diag) != len(self.size) or len(self.v) != len(self.size):
+        elif len(self.diag) != size or len(self.v) != size:
             return -1
 
-        elif orthant and len(self.v) != len(self.size):
+        elif orthant and len(self.v) != size:
             return -1
 
         iflag = 0
         if orthant:
-            iflag = self.lbfgs_optimize(size, msize, x, f, g, self.diag, self.w, orthant, C, self.v, self.xi, iflag)
+            iflag = self.lbfgs_optimizer(size, msize, x, f, g, self.diag, self.w, orthant, C, self.v, self.xi, iflag)
         else:
-            iflag = self.lbfgs_optimize(size, msize, x, f, g, self.diag, self.w, orthant, C, g, self.xi, iflag)
-
+            iflag = self.lbfgs_optimizer(size, msize, x, f, g, self.diag, self.w, orthant, C, g, self.xi, iflag)
 
         if iflag < 0:
             return -1

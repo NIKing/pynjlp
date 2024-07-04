@@ -1,4 +1,5 @@
 import io
+import math
 
 from enum import Enum, auto
 
@@ -35,12 +36,12 @@ class Encoder():
             algorithm):
         """
         训练
-        @param templFile     模板文件
-        @param trainFile     训练文件
+        @param templFile     模板数据文件
+        @param trainFile     训练数据文件
         @param modelFile     模型文件
         @param textModelFile 是否输出文本形式的模型文件
         @param maxitr        最大迭代次数
-        @param freq          特征最低频次
+        @param freq          特征最低频次，用作模型的特征瘦身
         @param eta           收敛阈值
         @param C             cost-factor
         @param threadNum     线程数
@@ -70,7 +71,7 @@ class Encoder():
         if not featureIndex.open(templFile, trainFile):
             print('Fail to open [' + templFile + '] and [' + trainFile + ']')
         
-        x = []
+        x = []      # taggerImpl 实例化对象，也可以认为是语料库的每个句子实例化对象
         try:
             with open(trainFile, 'r', encoding = 'utf8') as br:
                 lineNo = 0
@@ -78,13 +79,19 @@ class Encoder():
                     tagger = TaggerImpl(TaggerImpl.Mode.LEARN)
                     tagger.open(featureIndex)
                     
+                    # 注意，这里是按流读取每一行训练数据，数据是按照语料库写入的，会存在空格情况。
+                    # status 存在 3 种情况：
+                    # 1：错误，当训练数据的gram长度与设置不符，或者训练数据的标签超出设定标签集合长度
+                    # 2：文件读取完毕
+                    # 3：读取正常，但是无法正常编译特征
                     status = tagger.read(br)
                     if status == TaggerImpl.ReadStatus.ERROR:
                         print('error when reading ' + trainFile)
                         return False
                     
-                    #print(status)
-                    # 收集需要收缩的tagger
+                    # 收集需要瘦身的tagger, 训练文件的每条数据是按照语料库中每条句子进行
+                    # 这种情况就是碰到某一个句子读取完毕，碰到了空格情况
+                    # shrink() 作用很多，会调用featureIndex对象的编译特征模版功能
                     if not tagger.empty():
                         if not tagger.shrink():
                             print('fail to build feature index')
@@ -94,11 +101,13 @@ class Encoder():
                         x.append(tagger)
 
                     elif status == TaggerImpl.ReadStatus.EOF:
+                        print('文件全部读取完毕')
                         break
 
                     else:
                         continue
                     
+                    # 记录训练数据的句子的数量
                     lineNo += 1
 
                     if lineNo % 100 == 0:
@@ -108,21 +117,24 @@ class Encoder():
         except OSError as er:
             print('error:', er)
             return False
-        print('------------')
-
+        
         # 真正瘦身在这里执行
         featureIndex.shrink(freq, x)
-
-        alpha = [0.0] * len(featureIndex.size())
+        
+        # 特征的最大索引值
+        alpha = [0.0] * featureIndex.size()
         featureIndex.setAlpha(alpha)
 
-        print("Number of sentences: " + len(x))
-        print("Number of features:  " + featureIndex.size())
-        print("Number of thread(s): " + threadNum)
-        print("Freq:                " + freq)
-        print("eta:                 " + eta)
-        print("C:                   " + C)
-        print("shrinking size:      " + shrinkingSize)
+        print(f"Number of sentences: {len(x)}")
+        print(f"Number of features:  {featureIndex.size()}")
+        print(f"Number of thread(s): {threadNum}")
+        print(f"Number of alpha:     {len(alpha)}")
+        print(f"Maxitr:              {maxitr}")
+        print(f"C:                   {C}")
+        print(f"eta:                 {eta}")
+        print(f"shrinking size:      {shrinkingSize}")
+        print(f"algorithm:           {algorithm}")
+        print(f"Freq:                {freq}")
 
         if algorithm == Algorithm.CRF_L1 and \
             not self.runCRF(x, featureIndex, alpha, maxitr, C, eta, shrinkingSize, threadNum, True):
@@ -139,7 +151,7 @@ class Encoder():
                 print("MIRA excute error")
                 return False
 
-        if not featureIndex.save(modelFile, textModelFile):
+        if not featureIndex.save(modelFile, textModelFile, Encoder.MODEL_VERSION):
             print("Failed to save model")
 
         print("Done!")
@@ -150,10 +162,10 @@ class Encoder():
         """
         CRF 训练
         - param x             标记列表 
-        - param featureIndex  特征编号表
-        - param alpha         特征函数的代价
+        - param featureIndex  特征索引对象
+        - param alpha         最大特征索引组成的数组
         - param maxItr        最大迭代次数
-        - param C             cost factor
+        - param C             损失值
         - param eta           收敛阈值
         - param shrinkingSize 未使用
         - param threadNum     线程数
@@ -162,20 +174,23 @@ class Encoder():
         """
         oldObj = 1e+37
         converge = 0
-
+        
+        # 优化器函数
         lbfgs = LbfgsOptimizer()
         
         # 创建多线程
         def create_threads():
             threads = [] * threadNum
             for i in range(threadNum):
-                thread = CRFEncoderThread(alpha.length)
+                thread = CRFEncoderThread(len(alpha))
                 thread.start_i = i
                 thread.size = len(x)
                 thread.threadNum = threadNum
                 thread.x = x
 
                 threads.append(thread)
+
+            return threads
 
         threads = create_threads()
         
@@ -187,7 +202,7 @@ class Encoder():
             featureIndex.clear()
 
             try:
-                # 一次性提交线程所有任务
+                # 提交线程所有任务
                 for thread in threads:
                     thread.start()
                 
@@ -195,32 +210,34 @@ class Encoder():
                 for thread in threads:
                     thread.join()
 
-            except:
-                print('线程错误')
+            except RuntimeError as e:
+                print(f'线程错误:{e}')
                 return False
         
             # 将所有线程数据汇总到第一个线程内
             for i in range(1, threadNum):
+                #print(i, threads[i].obj, threads[i].err, threads[i].zeroone)
                 threads[0].obj += threads[i].obj
                 threads[0].err += threads[i].err
                 threads[0].zeroone += threads[i].zeroone
             
             # 期望值
             for i in range(1, threadNum):
-                for j in range(len(featureIndex)):
+                for j in range(featureIndex.size()):
                     threads[0].expected[j] += threads[i].expected[j]
 
             # 计算非零数量
             numNonZero = 0
-            if orthant :
-                for k in range(len(featureIndex)):
+             
+            if orthant :    # 使用 L1 范数
+                for k in range(featureIndex.size()):
                     threads[0].obj += Math.abs(alpha[k] / C)
                     if alpha[k] != 0.0:
                         numNonZero += 1
 
             else:
-                numNonZero = len(featureIndex)
-                for k in range(len(featureIndex)):
+                numNonZero = featureIndex.size()
+                for k in range(featureIndex.size()):
                     threads[0].obj += (alpha[k] * alpha[k] / (2.0 * C))
                     threads[0].expected[k] += alpha[k] / C
             
@@ -228,15 +245,26 @@ class Encoder():
             for i in range(i, threadNum):
                 threads[i].expected = None
             
-            diff = 1.0 if itr == 0 else (math.abs(oldObj - threads[0].obj) / oldObj)
-            print("iter:  " + itr)
-            print("terr:  " + (1.0 * threas[0].err / all_))
-            print("serr:  " + (1.0 * threas[0].zeroone / all_))
-            print("act:   " + numNonZero)
-            print("obj:   " + threads[0].obj)
-            print("diff:  " + diff)
+            try:
+                diff = 1.0 if itr == 0 else (abs(oldObj - threads[0].obj) / oldObj)
+            except ZeroDivisionError:
+                print('ZeroDivsionError')
+                diff = float('inf')
+
+            
+            print(f"iter:  {itr}/{maxItr}")
+            print(f"diff:  {diff}")
+            print(f"terr:  {(1.0 * threads[0].err / all_)}")
+            print(f"serr:  {(1.0 * threads[0].zeroone / all_)}")
+            
+            print(f"act:        {numNonZero}")
+            print(f"obj:        {threads[0].obj}")
+            print(f"expected:   {len(threads[0].expected)}")
+            print(f"orthant:    {orthant}")
+            print(' ')
             
             oldObj = threads[0].obj
+            
             if diff < eta:
                 converge += 1
             else:
@@ -245,8 +273,7 @@ class Encoder():
             if itr >= maxItr or converge >= 3:
                 break
 
-            ret = lbfgs.optimize(len(featureIndex), alpha, threads[0].obj, threads[0].expected, orthant, C)
-
+            ret = lbfgs.optimize(featureIndex.size(), alpha, threads[0].obj, threads[0].expected, orthant, C)
             if ret <= 0:
                 return False
             

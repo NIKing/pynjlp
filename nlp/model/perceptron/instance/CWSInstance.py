@@ -8,6 +8,8 @@ class CWSInstance(Instance):
     CHAR_END = '\u0002'
 
     def __init__(self, sentence, featureMap):
+        super().__init__()
+
         tagSet = featureMap.tagSet
         
         # 给句子打{B,E,M,S}标签

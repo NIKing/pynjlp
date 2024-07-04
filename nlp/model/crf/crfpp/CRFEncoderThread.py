@@ -2,15 +2,20 @@ import threading
 
 class CRFEncoderThread(threading.Thread):
     def __init__(self, wsize):
-        self.x = []             # 标记列表
+        super().__init__()
+
+        self.x = []             # 训练数据中的句子集合，句子是TaggerImpl对象
+        
         self.start_i = 0        # 当前线程编号
-        self.wSize = 0          # 特征函数长度????
+        self.wSize = 0          # 特征索引对象的最大值
         self.threadNum = 0      # 线程总数量
+        self.size = 0           # 训练数据中句子的数量
+        
         self.zeroone = 0
         self.err = 0
-        self.size = 0           # 句子长度
         self.obj = 0.0
-        self.expected = []
+        
+        self.expected = []      # 期望值
 
         if wsize > 0:
             self.wSize = wsize
@@ -18,24 +23,26 @@ class CRFEncoderThread(threading.Thread):
 
     def run(self):
         """线程的计算在这里"""
-        obj, erro, zeroone = 0.0, 0, 0
-
+        self.obj, self.err, self.zeroone = 0.0, 0, 0
+        
+        # 期望值
         if len(self.expected) == 0:
-            self.expected = [0.0]
+            self.expected = [0.0] * self.wSize
             
-
-        for i in range(self.start_i, self.size):
-            obj += self.x[i].gradient(expected)
-            
+        # 以当前线程为起点，以线程总数为步长，训练所有句子。比如[1,4,7],[2,6,9]这些句子
+        for i in range(self.start_i, self.size, self.threadNum):
+            # 计算坡度，应该是梯度计算，寻找最低点, 这里调用 TaggerImpl 对象
+            self.obj += self.x[i].gradient(self.expected)
+           
+            # 评测
             errorNum = self.x[i].eval()
-            err += errorNum
+            self.err += errorNum
 
             if errorNum != 0:
-                zeroone += 1
+                self.zeroone += 1
 
             self.x[i].clearNodes()
 
-
-        return err
+        return self.err
 
 

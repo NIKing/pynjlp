@@ -199,10 +199,19 @@ class LinearModel():
     
     def load(self, modelFile):
         if not modelFile:
-            return 
+            return False 
         
         # 读取模型
         byteArray = ByteArrayStream(modelFile)
+        if not self.loadByteArray(byteArray):
+            print(f'{modelFile}加载失败')
+            return
+
+        print('加载完毕')
+
+    def loadByteArray(self, byteArray):
+        if not byteArray:
+            return False
         
         # 初始化特征映射对象
         self.featureMap = ImmutableFeatureMDatMap()
@@ -222,7 +231,8 @@ class LinearModel():
                     parameter[i * tagSet.size() + j] = byteArray.next()
         
         self.parameter = parameter
-
+        
+        return True
 
     def viterbiDecode(self, instance, guessLabel):
         """

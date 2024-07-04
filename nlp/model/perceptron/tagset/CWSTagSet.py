@@ -1,8 +1,8 @@
 from nlp.model.perceptron.tagset.TagSet import TagSet
 from nlp.model.perceptron.common.TaskType import TaskType
 
+"""分词标记设置类"""
 class CWSTagSet(TagSet):
-    
     def __init__(self, b = None, m = None, e = None, s = None):
         super().__init__(TaskType.CWS)
         

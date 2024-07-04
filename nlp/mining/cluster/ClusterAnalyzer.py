@@ -62,7 +62,9 @@ class ClusterAnalyzer():
         # 根据K-means算法迭代优化聚类, 在这里会改变簇的数据分布
         self.refine_clusters(sectioned_clusters)
         
-        # 设置分段增益
+        # 计算分段增益,
+        # 计算一个簇被切分两部分后，两个部分复合向量的欧几里得长度 - 整个簇（未被切分）的复合向量的欧几里得长度，得到一个增益值
+        # 增益值约小说明，增益效果约差，用户可以设定增益值来确定切分的颗粒度
         cluster.set_sectioned_gain()
         
         # 清空复合向量的数据？？？

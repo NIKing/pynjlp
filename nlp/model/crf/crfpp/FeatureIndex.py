@@ -1,6 +1,9 @@
 import math
 from abc import ABC, abstractmethod
 
+from nlp.model.crf.crfpp.Node import Node
+from nlp.model.crf.crfpp.Path import Path
+
 class FeatureIndex(ABC):
 
     BOS = ["_B-1", "_B-2", "_B-3", "_B-4", "_B-5", "_B-6", "_B-7", "_B-8"]
@@ -9,8 +12,8 @@ class FeatureIndex(ABC):
 
     def __init__(self):
         self.maxid = 0
-        self.alpha = None
-        self.alphaFloat = None
+        self.alpha = []
+        self.alphaFloat = []
 
         self.threadNum = 1
         self.max_xsize = 0
@@ -20,7 +23,7 @@ class FeatureIndex(ABC):
         
         self.unigramTempls = []
         self.bigramTempls  = []
-        self.y = []                 # 标签集合
+        self.y = []                 # 通过语料库收集标签（去重）
 
         self.templs = ""
     
@@ -33,7 +36,7 @@ class FeatureIndex(ABC):
     def ysize(self):
         return len(self.y)
 
-    def size(slef):
+    def size(self):
         return self.getMaxid()
 
     def getMaxid(self):
@@ -74,6 +77,10 @@ class FeatureIndex(ABC):
 
     
     def buildFeatures(self, tagger):
+        """
+        编译特征模版
+        -param tagger TaggerImpl类 在Encoder代码中读取特征的时候碰到断句会自动创建一个 tagger 对象，因此一个 tagger 可以认为是一个句子的特征对象
+        """
         featureCache = tagger.getFeatureCache()
         tagger.setFeature_id(len(featureCache))
         
@@ -115,12 +122,49 @@ class FeatureIndex(ABC):
                 print('format error')
                 return False
             
-            #print('----', templ, curPos, featureID, '++++')
+            # 编译特征索引，利用双数组字典树建立特征空间
             id = self.getID(featureID)
             if id != -1:
                 feature.append(id)
 
+            #print(f'----cur={curPos}，templ={templ}, featureID={featureID}, id={id}++++')
+
         return True
+
+
+    def rebuildFeatures(self, tagger):
+        """
+        重新编译特征, 在这里重新生成 Node 对象
+        -param tagger TaggerImpl 对象
+        """
+        fid = tagger.getFeature_id()
+        featureCache = tagger.getFeatureCache()
+        
+        # 设置节点
+        for cur in range(tagger.size()):
+            f = featureCache[fid]
+            fid += 1
+
+            for i in range(len(self.y)):
+                n = Node()
+                n.clear()
+                n.x = cur
+                n.y = i
+                n.fVector = f
+
+                tagger.set_node(n, cur, i)
+        
+        # 创建路径，但是并未看到路径保存呀？？？？
+        for cur in range(1, tagger.size()):
+            f = featureCache[fid]
+            fid += 1
+
+            for j in range(len(self.y)):
+                for i in range(len(self.y)):
+                    p = Path()
+                    p.clear()
+                    p.add(tagger.get_node(cur - 1, j), tagger.get_node(cur, i))
+                    p.fvector = f
 
     def applyRule(self, templ, cur, tagger):
         """
@@ -143,7 +187,7 @@ class FeatureIndex(ABC):
             idx = tuple_[0].replace('[', '').split(',')
             
             r = self.getIndex(idx, cur, tagger)
-            if not r:
+            if r != None:
                 sb.append(r)
 
             if len(tuple_) > 1:
@@ -155,28 +199,100 @@ class FeatureIndex(ABC):
     def getID(self, featureID):
         pass
     
+    @abstractmethod
+    def clear(self):
+        pass
+
     def getIndex(self, idxStr, cur, tagger):
         """
-        获取
+        获取标记对象中特定元素的特征索引
         -param idxStr 特征模版中的索引值, 比如：U3:%x[-2,0]%x[-1,0] 中的 [-2,0]
         -param cur tagger实例中语料库的下标
         -param tagger 标记对象
         """
         row, col = int(idxStr[0]), int(idxStr[1])
-        pos = row + col
+        pos = row + cur     # 是特征所在句子中的位置，也是序列中的时刻
 
         if row < -len(FeatureIndex.EOS) or row > len(FeatureIndex.EOS) or col < 0 or col >= tagger.xsize():
             return None
 
         if self.checkMaxXsize:
-            max_xsize = max(self.max_xsize, col + 1)
+            self.max_xsize = max(self.max_xsize, col + 1)
         
-        #print('pos=',pos, 'size=', tagger.size())
+        # 设置超前了当前时刻的默认特征，比如：U0:_B-1
         if pos < 0:
             return FeatureIndex.BOS[-pos - 1]
-
+        
+        # 设置超出了当前时刻的默认特征，比如：U6:_B+1_B+2 
         elif pos >= tagger.size():
             return FeatureIndex.EOS[pos - tagger.size()]
-
+        
+        # 这是直接获取特征的值，比如：无\tB ，直接获取 “无”
         else:
             return tagger.x_str(pos, col)
+
+
+    def calcCost(self, obj):
+        """
+        计算损失值（费用）
+        """ 
+        if isinstance(obj, Path):
+            return self._calcCostPath(obj)
+
+        return self._calcCostNode(obj)
+
+    def _calcCostPath(self, path):
+        """
+        计算转移特征函数的代价
+        -param path 边
+        """
+        path.cost = 0.0
+        
+        if len(self.alphaFloat) > 0:
+            c = 0.0
+            i = 0
+            
+            while path.fvector[i] != -1:
+                c += self.alphaFloat[path.fvector[i] + path.lnode.y * len(self.y) + path.rnode.y]
+                i += 1
+
+            path.cost = self.costFactor * c
+
+        else:
+            c = 0.0
+            i = 0
+            
+            while path.fvector[i] != -1:
+                c += self.alpha[path.fvector[i] + path.lnode.y * len(self.y) + path.rnode.y]
+                i += 1
+
+            path.cost = self.costFactor * c
+
+        
+    def _calcCostNode(self, node):
+        """
+        计算状态特征函数的代价
+        -param node 节点
+        """
+        node.cost = 0.0
+
+        if len(self.alphaFloat) > 0:
+            c = 0.0
+            i = 0
+            
+            while node.fVector[i] != -1:
+                c += self.alphaFloat[node.fVector[i] + node.y]
+                i += 1
+
+            node.cost = self.costFactor * c
+
+        else:
+            c = 0.0
+            i = 0
+            
+            while node.fVector[i] != -1:
+                c += self.alpha[node.fVector[i] + node.y]
+                i += 1
+
+            node.cost = self.costFactor * c
+

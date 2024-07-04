@@ -1,8 +1,6 @@
 """键值对存储方式"""
 class KeyValuePair:
     def __init__(self, dat):
-        self.path   = []
-        
         self.index  = 0 
         self.value  = -1
         self.key    = None

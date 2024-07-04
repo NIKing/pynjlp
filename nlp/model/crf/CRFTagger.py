@@ -1,16 +1,17 @@
 import time
+
 from abc import ABC, abstractmethod
 
 from nlp.model.crf.LogLinearModel import LogLinearModel
 
-from nlp.model.crf.crfpp.Encoder import Encoder
+from nlp.model.crf.crfpp.Encoder import Encoder, Algorithm
 from nlp.model.crf.crfpp.crf_learn import crf_learn
 
 from nlp.corpus.io.IOUtil import writeTxtByList
 
 class CRFTagger(ABC):
     def __init__(self, modelPath):
-        if not modelPath:       # 训练模式
+        if not modelPath:       # 训练模式, 也就是说训练的时候并没有用到线性模型
             return 
         
         self.model = LogLinearModel(modelFile = modelPath)
@@ -44,10 +45,11 @@ class CRFTagger(ABC):
             thread  = crf_learn.thread
 
             shrinking_size = crf_learn.shrinking_size
-            algorithm = crf_learn.algorithm
+            algorithm = Algorithm.fromString(crf_learn.algorithm)
         
         # 需要在生成模版文件的同时，根据训练数据生成标签集【B,M,E,S】训练数据
         if not templFile:
+            # 生产模版数据
             templateData = self.getDefaultTemplateData()
 
             fileName  = 'crfpp-template-' + time.strftime("%Y-%m-%d", time.localtime()) + '.txt'

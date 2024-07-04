@@ -4,7 +4,7 @@ class crf_learn():
     freq = 1
    
     # 最大迭代次数
-    maxitr = 1000
+    maxitr = 10
 
     # 成本-系数
     cost = 1.0
