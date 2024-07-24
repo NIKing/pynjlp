@@ -10,6 +10,9 @@ class MutableFeatureMap(FeatureMap):
    
     def getSize(self) -> int:
         return len(self.featureIdMap)
+
+    def entrySet(self):
+        return self.featureIdMap.entrySet()
     
     def addTransitionFeature(self, tagSet):
         """
@@ -25,8 +28,7 @@ class MutableFeatureMap(FeatureMap):
         val = self.featureIdMap.get(key)
         if not val:
             val = len(self.featureIdMap)
-        
-        self.featureIdMap[key] = val 
+            self.featureIdMap[key] = val 
 
         return val
        

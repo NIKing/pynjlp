@@ -28,17 +28,20 @@ class MutableDoubleArrayTrieInteger:
         self.charMap = charMap if charMap != None else Utf8CharacterMapping()
 
         self.clear()
-
+        
         if stringIntegerMap != None and entrySet == None:
             entrySet = stringIntegerMap.entrySet()
         
         # 到这里已经是字典了，我尝试更换字典获取数据的方法
         if entrySet != None:
             for entry in entrySet:
-                #self.put(entry.getKey(), entry.getValue())
 
+                #self.put(entry.getKey(), entry.getValue())
                 # 更换字典获取数据方法 -- 2024年5月22日
                 self.put(entry[0], entry[1])
+    
+    def __len__(self):
+        return self.size
 
     def entrySet(self):
         pair = KeyValuePair(self)
@@ -438,9 +441,11 @@ class MutableDoubleArrayTrieInteger:
         """加载模型"""
         
         self.size = byteArray.next()
-        
+         
         # 获取双双数组长度
         array_size = byteArray.next()
+
+        print('-=',self.size, array_size)
 
         self.base = byteArray.next(count = array_size)
         self.check = byteArray.next(count = array_size) 

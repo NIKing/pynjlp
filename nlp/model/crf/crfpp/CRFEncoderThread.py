@@ -11,10 +11,9 @@ class CRFEncoderThread(threading.Thread):
         self.threadNum = 0      # 线程总数量
         self.size = 0           # 训练数据中句子的数量
         
-        self.zeroone = 0
-        self.err = 0
-        self.obj = 0.0
-        
+        self.zeroone = 0        # 0|1数量，错误频率
+        self.err = 0            # 错误数
+        self.obj = 0.0          # 梯度值
         self.expected = []      # 期望值
 
         if wsize > 0:
@@ -29,7 +28,8 @@ class CRFEncoderThread(threading.Thread):
         if len(self.expected) == 0:
             self.expected = [0.0] * self.wSize
             
-        # 以当前线程为起点，以线程总数为步长，训练所有句子。比如[1,4,7],[2,6,9]这些句子
+        # 以当前线程为起点，以线程总数为步长，训练所有句子。
+        # 比如：线程1训练[1,4,7]句子，线程2训练[2,6,9]这些句子
         for i in range(self.start_i, self.size, self.threadNum):
             # 计算坡度，应该是梯度计算，寻找最低点, 这里调用 TaggerImpl 对象
             self.obj += self.x[i].gradient(self.expected)

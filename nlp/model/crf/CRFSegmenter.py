@@ -6,6 +6,7 @@ from nlp.model.crf.crfpp.FeatureIndex import FeatureIndex
 from nlp.model.perceptron.instance.CWSInstance import CWSInstance
 from nlp.model.perceptron.PerceptronSegmenter import PerceptronSegmenter
 
+from nlp.model.perceptron.instance.Instance import Instance
 from nlp.dictionary.other.CharTable import CharTable
 from nlp.corpus.io.IOUtil import loadInstance
 
@@ -26,23 +27,26 @@ class CRFInstance(CWSInstance):
         for i in range(len(self.featureTemplateArray)):
             offsetIterator = self.featureTemplateArray[i].offsetList
             delimiterIterator = self.featureTemplateArray[i].delimiterList
-
+            
+            #print(offsetIterator, delimiterIterator)
             for j, offset in enumerate(offsetIterator):
                 offset = offset[0] + position
 
                 if offset < 0:
-                    sbFeature.append(FeatureIndex.BOS[-(offset) + 1])
+                    sbFeature.append(FeatureIndex.BOS[-(offset + 1)])
                 elif offset >= len(sentence):
                     sbFeature.append(FeatureIndex.EOS[offset - len(sentence)])
                 else:
                     sbFeature.append(sentence[offset])
-
-                if delimiterIterator[j + 1]:
+                
+                # 不从首位（0）开始，首位是 "U0:"
+                if len(delimiterIterator) > j + 1:
                     sbFeature.append(delimiterIterator[j + 1])
                 else:
                     sbFeature.append(i)
-
-            self.addFeatureTheClear(sbFeature, featureVec, featureMap)
+            
+            #print(sbFeature, featureVec)
+            Instance.addFeatureThenClear(sbFeature, featureVec, featureMap)
 
         return self.toFeatureArray(featureVec)
 
@@ -68,8 +72,9 @@ class CRFSegmenter(CRFTagger):
         
         if wordList == None:
             wordList = []
-
-        self.proceptronSegmenter.segment(text, self.createInstance(normalized), wordList)
+        
+        # 感知机分词器
+        self.proceptronSegmenter.segment(text, instance = self.createInstance(normalized), output = wordList)
 
         return wordList
 
@@ -77,7 +82,7 @@ class CRFSegmenter(CRFTagger):
     def createInstance(self, text):
         """返回的是结构化感知机的分词实例，CRFInstance继承CWSInstance"""
         featureTemplateArray = self.model.getFeatureTemplateArray()
-        return CRFInstance(text, self.model.freatureMap, featureTemplateArray)
+        return CRFInstance(text, self.model.featureMap, featureTemplateArray)
     
     def convertCorpus(self, filePath) -> list:
         """转换【BMES】标记"""

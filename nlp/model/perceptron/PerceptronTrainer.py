@@ -85,8 +85,8 @@ class PerceptronTrain(InstanceConsumer):
         self.printAccuracy(accuracy)
 
         # 保存模型
-        #model.save(modelFile)
-        #print('模型保存成功')
+        model.save(modelFile, text = True)
+        print('模型保存成功')
         
         return Result(model, accuracy)
     
@@ -100,6 +100,8 @@ class PerceptronTrain(InstanceConsumer):
 
         # 加载文本数据
         corpusList = loadInstance(trainingFile)
+        
+        # 缩短训练数据
         corpusList = corpusList[:int(len(corpusList) * 0.05)]
 
         # 正规化后/每句话进行特征采集

@@ -71,26 +71,27 @@ class LinearModel():
         -param text         是否输出文本以供调试
         """
         #self.compress(ratio, 1e-3)
-        
-        # 保存到二进制
-        self.saveToBin(modelFile)
-        
+                
+        # 保存特征映射值和特征权重 转换二进制保存
+        out = []
+        self.saveToBin(out)
+        writeListToBin(modelFile, out) 
+
         # 保存到文本
         if not text:
             return
 
         if not featureIdSet:
             featureIdSet = self.featureMap.entrySet()
-    
-        self.saveToText(modelFile, featureIdSet)
+        
+        bw = []
+        self.saveToText(bw, featureIdSet)
+        writeTxtByList(modelFile + '.txt', bw)
 
-    def saveToBin(self, modelFile):
+    def saveToBin(self, out):
         """保存模型二进制数据到.bin"""
         if not isinstance(self.featureMap, ImmutableFeatureMDatMap):
             self.featureMap = ImmutableFeatureMDatMap(featureIdMap = self.featureMap.entrySet(), tagSet = self.tagSet())
-        
-        # 保存特征映射值和特征权重
-        out = []
         
         # 保存双数组
         self.featureMap.save(out)
@@ -98,22 +99,16 @@ class LinearModel():
         # 保存权重参数, 数组的位置代表特征映射，位置中的值表示权重
         for aParameter in self.parameter:
             out.append(aParameter)
-        
-        writeListToBin(modelFile, out) 
 
-    def saveToText(self, modelFile, featureIdSet = None):
+    def saveToText(self, bw, featureIdSet = None):
         """为了调试方便，保存模型数据到.txt"""
         if not featureIdSet:
             return
-        
-        bw = []
+       
         tagSet = self.tagSet()
         
-        for entry in featureIdSet:
-            pair = []
-            bw.append(entry.getKey())
-            
-            #print(entry.getKey(), entry.getValue())
+        for key, val in featureIdSet:
+            bw.append(key)
 
             values = []
             # 双数组中保存的键值对数量和权重数量一致，一般情况是一致的
@@ -121,17 +116,15 @@ class LinearModel():
             # 当提取的特征数据是多个的时候，特征函数返回的是特征向量，这些特征向量都具有相同的标签
             # 进行在线学习的时候（执行update），会用特征向量中的特征值在字典树的value作为parameter的key保存，并依次进行更新权重数据。
             # 因此，在这里可以直接从parameter取特征的权重值
-            if entry.size() == len(self.parameter):
-                values = str(self.parameter[entry.getValue()])
+            if len(featureIdSet) == len(self.parameter):
+                bw.append('\t')
+                values = self.parameter[val]
             else:
                 for i in range(len(tagSet)):
-                    values.append(str(self.parameter[entry.getValue() * tagSet.size() + i]))
+                    bw.append('\t')
+                    values.append(str(self.parameter[val * tagSet.size() + i]))
             
-            bw.append(''.join(''.join(values)))
-        
-        #print(tagSet.stringIdMap)
-        #print(bw)
-        writeTxtByList(modelFile + '.txt', bw)
+            bw.extend(values)
     
     def compress(self, ratio = 0, threshold = 1e-3):
         """
@@ -217,6 +210,7 @@ class LinearModel():
         self.featureMap = ImmutableFeatureMDatMap()
         self.featureMap.load(byteArray)
         
+        # 这里有个问题，parameter 是根据 featureMap来
         size = self.featureMap.getSize()
         tagSet = self.featureMap.tagSet
         
@@ -226,6 +220,8 @@ class LinearModel():
 
         else:
             parameter = [0.0] * (size * tagSet.size())
+            print(size, tagSet.size())
+            print('加载的特征长度', len(parameter))
             for i in range(size):
                 for j in range(tagSet.size()):
                     parameter[i * tagSet.size() + j] = byteArray.next()

@@ -28,7 +28,7 @@ class PerceptronSegmenter(PerceptronTagger):
             return 
         
         # 实例化当前句子，会创建当前句子的特征向量
-        if not normalized:
+        if not normalized and not isinstance(normalized, str):
             normalized = CharTable.normalize(sentence)
 
         if not instance and normalized:

@@ -19,6 +19,7 @@ class ReadStatus:
     EOF = 1
     ERROR = 2
 
+"""标记器类"""
 class TaggerImpl():
 
     Mode = Mode
@@ -39,7 +40,7 @@ class TaggerImpl():
         self.feature_index = None
 
         self.x = []
-        self.node = []      #注意，node 里面的元素数 list
+        self.node = []      #注意，node 里面的元素数 list, 意味着 node 是二维列表
         self.answer = []
         self.result = []
 
@@ -89,19 +90,23 @@ class TaggerImpl():
         return status
     
     def add_cols(self, line):
+        # line = 强	B，分割空格部位, cols = ['强','B']
         cols = re.split("[\t ]", line)
         return self.add(cols)
 
     def add(self, cols):
+        """
+        这里添加的东西很多，比如：特征、特征对应的标记答案、特征节点
+        """
         xsize = self.feature_index.getXsize()
 
-        # 训练数据的 gram长度 小于 之前设定的值就报错, 当在训练的时候，需要+1表示添加标签
+        # 训练数据的 gram 长度 小于 之前设定的值就报错, 当在训练的时候，需要+1表示添加标签
         if (self.mode == Mode.LEARN and len(cols) < xsize + 1) \
                 or (self.mode == Mode.TEST and len(cols) < xsize):
                     print(f'# x is small: size={len(cols)} xsize={xsize}')
                     return False
         
-        # 收集语料数据
+        # 收集训练数据，注意: cols 是数组形式
         self.x.append(cols)
         self.result.append(0)
 
@@ -110,20 +115,22 @@ class TaggerImpl():
         if self.mode == Mode.LEARN:
             r = self.ysize
             
-            # 找到当前单词的标签在集合中的位置
+            # 找到当前单词的标记在集合中的位置, 即，找到单词对应的标记索引
             for i in range(self.ysize):
                 if cols[xsize] == self.yname(i):
                     r = i
             
-            # 如果找到的值等于默认值，就认为失败，因为默认值为集合长度，而集合的下标不可能超出长度
+            # 如果找到的值等于默认值，就认为失败。因为默认值为集合长度，而集合的下标不可能超出长度
             if r == self.ysize:
                 print('canot find answer')
                 return False
 
             tmpAnswer = r
-
+        
+        # 收集正确答案- 每个词对应的标记编号
         self.answer.append(tmpAnswer)
-
+        
+        # 根据标记长度创建节点
         l = [Node()] * self.ysize
         self.node.append(l)
 
@@ -178,6 +185,12 @@ class TaggerImpl():
         return self.node[i][j]
 
     def set_node(self, n, i, j):
+        """
+        设置特征中每个标记节点
+        -param n 创建的节点对象
+        -param i 句子中当前特征下标
+        -param j 特征的标记编号
+        """
         self.node[i][j] = n
 
     def clear(self):
@@ -208,7 +221,7 @@ class TaggerImpl():
     def gradient(self, expected) -> float:
         """
         计算梯度
-        -param expected 梯度向量
+        -param expected 梯度向量, 实际上是所有特征的所有可能标签组成的数组
         return 损失函数
         """
         if len(self.x) <= 0:
@@ -227,6 +240,7 @@ class TaggerImpl():
         for i in range(len(self.x)):
             fvector = self.node[i][self.answer[i]].fVector
             j = 0
+            
             while fvector[j] != -1:
                 idx = fvector[j] + self.answer[i]
                 expected[idx] -= 1
@@ -260,15 +274,19 @@ class TaggerImpl():
             return
         
         # 重新编译特征，在这里给特征节点（Node）赋值属性，之前一直找不到节点计算的数据从哪儿来，现在知道了
+        # 与其说是给特征节点赋值，不如说就像函数名字一样，是在编译篱笆网络（有向无环图)
         self.feature_index.rebuildFeatures(self)
-        
-        # 计算 花费（cost）/ 也是损失值的意思
+
+        # 计算 花费（cost）， 也是损失值的意思
         for i in range(len(self.x)):
             for j in range(self.ysize):
 
+                # 在这里计算节点损失值？可是，节点的期望值是在后面计算的呀???
+                # 比较倾向于，在这里只是初始化节点的cost，不过，感觉没有意义!!!
                 self.feature_index.calcCost(self.node[i][j])
+                
+                # 计算路径损失值
                 lpath = self.node[i][j].lpath
-
                 for p in lpath:
                     self.feature_index.calcCost(p)
 
@@ -276,7 +294,7 @@ class TaggerImpl():
         # 增加多倍分解的惩罚
         if len(self.penalty) <= 0:
             return
-
+        
         for i in range(len(self.x)):
             for j in range(self.ysize):
                 self.node[i][j].cost += self.penalty[i][j]
@@ -287,16 +305,19 @@ class TaggerImpl():
 
         if len(self.x) <= 0:
             return
-
+        
+        # 表示从序列开始到当前节点的所有可能路径的概率累积（前向）
         for i in range(len(self.x)):
             for j in range(self.ysize):
                 self.node[i][j].calcAlpha()
-
+        
+        # 表示从当前节点到序列末端的所有可能路径的概率累积（后向）
         for i in range(len(self.x) - 1, -1, -1):
             for j in range(self.ysize):
                 self.node[i][j].calcBeta()
 
-
+        
+        # 第一个节点所有可能路径的概率累积
         self.Z = 0.0
         for j in range(self.ysize):
             self.Z = Node.logsumexp(self.Z, self.node[0][j].beta, j == 0)

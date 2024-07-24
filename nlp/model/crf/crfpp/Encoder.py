@@ -65,13 +65,15 @@ class Encoder():
             print('thread must be > 0')
             return False
         
-        # open() 具有提取语料库特征（好像是一元和二元语法模版)
-        # 当然，这里还有检查文件格式是否正确的功能
+        # open() 作用：
+        # 1，读取模版数据，创建一元和二元语法模版对象，并生成模版字符串；
+        # 2，读取训练数据，创建标注集合(y)，统计训练数据的长度(xSize)；
+        # 3，当然，这里还有检查文件格式是否正确的功能；
         featureIndex = EncoderFeatureIndex(threadNum)
         if not featureIndex.open(templFile, trainFile):
             print('Fail to open [' + templFile + '] and [' + trainFile + ']')
         
-        x = []      # taggerImpl 实例化对象，也可以认为是语料库的每个句子实例化对象
+        x = []      # 收集taggerImpl 实例化对象，也可以认为是语料库的每个句子实例化对象
         try:
             with open(trainFile, 'r', encoding = 'utf8') as br:
                 lineNo = 0
@@ -90,9 +92,11 @@ class Encoder():
                         return False
                     
                     # 收集需要瘦身的tagger, 训练文件的每条数据是按照语料库中每条句子进行
-                    # 这种情况就是碰到某一个句子读取完毕，碰到了空格情况
-                    # shrink() 作用很多，会调用featureIndex对象的编译特征模版功能
+                    # not empty() 就是碰到某一个句子读取完毕（碰到了空格情况）
                     if not tagger.empty():
+                        
+                        # shrink() 作用很多，会调用featureIndex对象的编译特征模版功能
+                        # 针对整个句子进行特征编译
                         if not tagger.shrink():
                             print('fail to build feature index')
                             return False
@@ -121,7 +125,8 @@ class Encoder():
         # 真正瘦身在这里执行
         featureIndex.shrink(freq, x)
         
-        # 特征的最大索引值
+        # size, 所以特征的标签总数
+        # 当前虽然在这里 setAlpha() 了，但是给alpha赋值的地方在 LbfgsOptimizer.lbfgs_optimizer() 中
         alpha = [0.0] * featureIndex.size()
         featureIndex.setAlpha(alpha)
 
@@ -151,9 +156,9 @@ class Encoder():
                 print("MIRA excute error")
                 return False
 
-        if not featureIndex.save(modelFile, textModelFile, Encoder.MODEL_VERSION):
-            print("Failed to save model")
-
+        #if not featureIndex.save(modelFile, textModelFile, Encoder.MODEL_VERSION):
+        #    print("Failed to save model")
+        
         print("Done!")
 
         return True
@@ -169,7 +174,7 @@ class Encoder():
         - param eta           收敛阈值
         - param shrinkingSize 未使用
         - param threadNum     线程数
-        - param orthant       是否使用L1范数
+        - param orthant       是否使用L1范数，默认L2
          return 是否成功
         """
         oldObj = 1e+37
@@ -198,6 +203,9 @@ class Encoder():
         for i in range(len(x)):
             all_ += x[i].size()
         
+        print('执行线程')
+        print(featureIndex.test_alpha())
+
         for itr in range(maxItr):
             featureIndex.clear()
 
@@ -213,7 +221,8 @@ class Encoder():
             except RuntimeError as e:
                 print(f'线程错误:{e}')
                 return False
-        
+
+            print('-----------------') 
             # 将所有线程数据汇总到第一个线程内
             for i in range(1, threadNum):
                 #print(i, threads[i].obj, threads[i].err, threads[i].zeroone)
@@ -272,7 +281,9 @@ class Encoder():
 
             if itr >= maxItr or converge >= 3:
                 break
-
+            
+            # 在这里会根据损失值和期望值，更新权重到 alpha
+            # crf并没有在线学习机制，整个一起进行多线程计算损失值
             ret = lbfgs.optimize(featureIndex.size(), alpha, threads[0].obj, threads[0].expected, orthant, C)
             if ret <= 0:
                 return False

@@ -1,8 +1,8 @@
 import re
 
 class FeatureTemplate():
-    pattern = re.compile("%x\[(-?\d*),(\d*)\]")
-
+    pattern = re.compile(r'%x\[(-?\d*),(\d*)\]', re.I)
+            
     def __init__(self):
         self.template = ""
         
@@ -24,6 +24,18 @@ class FeatureTemplate():
             self.delimiterList.append(byteArray.next())
 
         return True
+    
+    def save(self, out):
+        out.append(self.template)
+
+        out.append(len(self.offsetList))
+        for offset in self.offsetList:
+            out.append(offset[0])
+            out.append(offset[1])
+        
+        out.append(len(self.delimiterList))
+        for s in self.delimiterList:
+            out.append(s)
 
     @staticmethod
     def create(template):
@@ -33,9 +45,14 @@ class FeatureTemplate():
         featureTemplate.offsetList = []
         featureTemplate.template = template
 
-        matcher = FeatureTemplate.pattern.match(template)
+        matchers = FeatureTemplate.pattern.finditer(template)
+        #print(f'----{template}--{matchers}')
+
         start = 0
-        while matcher:
+        for matcher in matchers:
+            # start() 是获取正则表达式匹配的结果在源字符的起始位置
+            # group(0) 返回匹配成功的整个子串，比如：%x[-1,0]
+            # group(1) 返回匹配成功的整个子串第一组值，group(2)返回第二组值，不存在group(3)
             featureTemplate.delimiterList.append(template[start:matcher.start()])
             featureTemplate.offsetList.append([int(matcher.group(1)), int(matcher.group(2))])
 

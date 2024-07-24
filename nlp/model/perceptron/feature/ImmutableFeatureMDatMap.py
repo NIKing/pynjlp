@@ -46,7 +46,7 @@ class ImmutableFeatureMDatMap(FeatureMap):
 
         # 加载分类标签
         super().loadTagSet(byteArray)
-
+        
         # 加载双数组字典树
         return self.dat.load(byteArray)
 

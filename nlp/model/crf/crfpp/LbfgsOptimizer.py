@@ -11,7 +11,6 @@ class LbfgsOptimizer():
         self.xi   = []
         self.diag = []
 
-
         self.iflag = 0
         self.iscn  = 0
         self.nfev  = 0
@@ -63,23 +62,22 @@ class LbfgsOptimizer():
                     v[i] = 0
 
             else:
-
                 v[i] = g[i] + C * Mcsrch.sigma(x[i])
 
     def lbfgs_optimizer(self, size, msize, x, f, g, diag, w, orthant, C, v, xi, iflag):
         """
         -param size int 特征数量
-        -param msize int
-        -param x    float[] 
-        -param f    float
-        -param g    float[]
-        -param diag float[]
-        -param w    float[]
-        -param orthant boolean
-        -param C float
-        -param v float[]
-        -param xi float[]
-        -param iflag int
+        -param msize int    内置参数 默认值 5
+        -param x    float[] 最大特征索引组成的数组, 外部的alpha，需要给其设置值，感觉应该是每个特征权重值的存放位置
+        -param f    float   损失值
+        -param g    float[] 期望值
+        -param diag float[] 内置参数
+        -param w    float[] 内置参数
+        -param orthant boolean 是否使用 L1
+        -param C float      系统设定的损失值
+        -param v float[]    内置参数（使用L1时）
+        -param xi float[]   内置参数
+        -param iflag int    内置参数
         """
         yy, ys, bound, cp = 0.0, 0.0, 0, 0
 
@@ -97,9 +95,10 @@ class LbfgsOptimizer():
             for i in range(size):
                 diag[i] = 1.0
             
-            self.ispt = size + (msize << 1)
+            self.ispt = size + (msize << 1)             # << 左位移 相当于 msize * 2
             self.iypt = self.ispt + size * msize
-
+            
+            # ??
             for i in range(size):
                 w[self.ispt + i] = -v[i] * diag[i]
             
@@ -181,7 +180,6 @@ class LbfgsOptimizer():
                     Mcsrch.daxpy(size, beta, w, iscn, w, 0)
 
                     cp += 1
-
                     if cp == msize:
                         cp = 0
 
@@ -214,7 +212,8 @@ class LbfgsOptimizer():
             self.stp  = stpArr[0]
             self.info = infoArr[0]
             self.nfev = nfevArr[0]
-
+            
+            # 在这里给 alpha[] 赋值
             if self.info == -1:
                 if orthant:
                     for i in range(size):
@@ -252,10 +251,10 @@ class LbfgsOptimizer():
         优化器
         -param size     int         特征数量大小
         -param x        float[]     最大特征索引组成的数组 
-        -param f        float
+        -param f        float       损失值
         -param g        float[]     期望值
-        -param orthant  boolean     是否使用 L1 范数
-        -param C        float       损失值
+        -param orthant  boolean     是否使用 L1 范数，默认 L2
+        -param C        float       系统设定的损失值
         """
 
         msize = 5
@@ -275,16 +274,18 @@ class LbfgsOptimizer():
         elif orthant and len(self.v) != size:
             return -1
 
-        iflag = 0
+        _iflag = 0
         if orthant:
-            iflag = self.lbfgs_optimizer(size, msize, x, f, g, self.diag, self.w, orthant, C, self.v, self.xi, iflag)
+            _iflag = self.lbfgs_optimizer(size, msize, x, f, g, self.diag, self.w, orthant, C, self.v, self.xi, self.iflag)
         else:
-            iflag = self.lbfgs_optimizer(size, msize, x, f, g, self.diag, self.w, orthant, C, g, self.xi, iflag)
+            _iflag = self.lbfgs_optimizer(size, msize, x, f, g, self.diag, self.w, orthant, C, g, self.xi, self.iflag)
+        
+        self.iflag = _iflag
 
-        if iflag < 0:
+        if _iflag < 0:
             return -1
 
-        if iflag == 0:
+        if _iflag == 0:
             self.clear()
             return 0
 

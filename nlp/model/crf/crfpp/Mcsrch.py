@@ -1,3 +1,4 @@
+import math
 
 """模糊搜索"""
 class Mcsrch():
@@ -108,7 +109,7 @@ class Mcsrch():
             dg = Mcsrch.ddot(size, g, 0, s, startOffset)
             ftest1 = self.finit + stp[0] * self.dgtest
 
-            if brackt and ((stp[0] <= self.stmin or stp[0] >= self.stmax) or self.infoc == 0):
+            if self.brackt and ((stp[0] <= self.stmin or stp[0] >= self.stmax) or self.infoc == 0):
                 info[0] = 6
             
             if stp[0] == Mcsrch.lb3_1_stpmax and f <= ftest1 and dg <= self.dgtest:
@@ -123,13 +124,13 @@ class Mcsrch():
             if self.brackt and self.stmax - self.stmin <= Mcsrch.xtol * self.stmax:
                 info[0] = 2
             
-            if f <= ftest1 and math.abs(dg) <= Mcsrch.lb3_1_gtol * (-self.dginit):
+            if f <= ftest1 and abs(dg) <= Mcsrch.lb3_1_gtol * (-self.dginit):
                 info[0] = 1
             
             if info[0] != 0:
                 return
             
-            if stage1 and f <= ftest1 and dg >= math.min(Mcsrch.ftol, Mcsrch.lb3_1_gtol) * self.dginit:
+            if self.stage1 and f <= ftest1 and dg >= min(Mcsrch.ftol, Mcsrch.lb3_1_gtol) * self.dginit:
                 self.stage1 = False
 
             if self.stage1 and f <= self.fx and f > ftest1:
@@ -153,7 +154,7 @@ class Mcsrch():
                 infocArr = [self.infoc]
                 
                 Mcsrch.mcstep(stxArr, fxmArr, dgxmArr, styArr, fymArr, dgymArr, stp, fm, dgm, bracktArr,
-                       stmin, stmax, infocArr)
+                       self.stmin, self.stmax, infocArr)
 
                 self.stx = stxArr[0]
                 fxm = fxmArr[0]
@@ -185,7 +186,7 @@ class Mcsrch():
                 infocArr = [self.infoc]
                 
                 Mcsrch.mcstep(stxArr, fxArr, dgxArr, styArr, fyArr, dgyArr, stp, f, dg, bracktArr,
-                       stmin, stmax, infocArr)
+                       self.stmin, self.stmax, infocArr)
                 
                 self.stx = stxArr[0]
                 self.fx = fxArr[0]
@@ -200,13 +201,13 @@ class Mcsrch():
             
             if self.brackt:
                 d1 = self.sty - self.stx
-                if math.abs(d1) >= p66 * self.width1:
+                if abs(d1) >= p66 * self.width1:
                     stp[0] = self.stx + p5 * (self.sty - self.stx)
 
                 self.width1 = self.width
 
                 d1 = self.sty - self.stx
-                self.width = math.abs(d1)
+                self.width = abs(d1)
             
             firstLoop = False
 
@@ -249,22 +250,23 @@ class Mcsrch():
         p, q, s, d1, d2, d3, r, gamma, theta, stpq, stpc, stpf = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
         if brackt[0] and ( \
-                (stp[0] <= math.min(stx[0], sty[0]) or stp[0] >= math.max(stx[0], sty[0])) or \
+                (stp[0] <= min(stx[0], sty[0]) or stp[0] >= max(stx[0], sty[0])) or \
                 dx[0] * (stp[0] - stx[0]) >= 0.0 or stpmax < stpmin \
             ):
             return
 
-        sgnd = dp * (dx[0] / math.abs(dx[0]))
+        sgnd = dp * (dx[0] / abs(dx[0]))
 
         if fp > fx[0]:
             info[0] = 1
             bound = True
             theta = (fx[0] - fp) * 3 / (stp[0] - stx[0]) + dx[0] + dp
-            d1 = math.abs(theta)
-            d2 = math.abs(dx[0])
-            d1 = math.max(d1, d2)
-            d2 = math.abs(dp)
-            s = math.max(d1, d2)
+            
+            d1 = abs(theta)
+            d2 = abs(dx[0])
+            d1 = max(d1, d2)
+            d2 = abs(dp)
+            s = max(d1, d2)
             d1 = theta / s
             gamma = s * math.sqrt(d1 * d1 - dx[0] / s * (dp / s))
 
@@ -281,7 +283,7 @@ class Mcsrch():
 
             d1 = stpc - stx[0]
             d2 = stpq - stx[0]
-            if math.abs(d1) < math.abs(d2):
+            if abs(d1) < abs(d2):
                 stpf = stpc
             else:
                 stpf = stpc + (stpq - stpc) / 2
@@ -293,11 +295,11 @@ class Mcsrch():
             bound = False
             theta = (fx[0] - fp) * 3 / (stp[0] - stx[0]) + dx[0] + dp
             
-            d1 = math.abs(theta)
-            d2 = math.abs(dx[0])
-            d1 = math.max(d1, d2)
-            d2 = math.abs(dp)
-            s = math.max(d1, d2)
+            d1 = abs(theta)
+            d2 = abs(dx[0])
+            d1 = max(d1, d2)
+            d2 = abs(dp)
+            s = max(d1, d2)
             d1 = theta / s
             gamma = s * math.sqrt(d1 * d1 - dx[0] / s * (dp / s))
 
@@ -314,27 +316,27 @@ class Mcsrch():
             d1 = stpc - stp[0]
             d2 = stpq - stp[0]
             
-            if math.abs(d1) > math.abs(d2):
+            if abs(d1) > abs(d2):
                 stpf = stpc
             else:
                 stpf = stpq
             
             brackt[0] = True
         
-        elif math.abs(dp) < math.abs(dx[0]):
+        elif abs(dp) < abs(dx[0]):
             info[0] = 3
             bound = True
             theta = (fx[0] - fp) * 3 / (stp[0] - stx[0]) + dx[0] + dp
             
-            d1 = math.abs(theta)
-            d2 = math.abs(dx[0])
-            d1 = math.max(d1, d2)
-            d2 = math.abs(dp)
-            s = math.max(d1, d2)
+            d1 = abs(theta)
+            d2 = abs(dx[0])
+            d1 = max(d1, d2)
+            d2 = abs(dp)
+            s = max(d1, d2)
             d3 = theta / s
             d1 = 0.0
             d2 = d3 * d3 - dx[0] / s * (dp / s)
-            gamma = s * math.sqrt((math.max(d1, d2)))
+            gamma = s * math.sqrt((max(d1, d2)))
 
             if stp[0] > stx[0]:
                 gamma = -gamma
@@ -355,7 +357,7 @@ class Mcsrch():
                 d1 = stp[0] - stpc
                 d2 = stp[0] - stpq
                 
-                if math.abs(d1) < math.abs(d2):
+                if abs(d1) < abs(d2):
                     stpf = stpc
                 else:
                     stpf = stpq
@@ -363,7 +365,7 @@ class Mcsrch():
                 d1 = stp[0] - stpc
                 d2 = stp[0] - stpq
                 
-                if math.abs(d1) > math.abs(d2):
+                if abs(d1) > abs(d2):
                     stpf = stpc
                 else:
                     stpf = stpq
@@ -374,11 +376,11 @@ class Mcsrch():
             
             if brackt[0]:
                 theta = (fp - fy[0]) * 3 / (sty[0] - stp[0]) + dy[0] + dp
-                d1 = math.abs(theta)
-                d2 = math.abs(dy[0])
-                d1 = math.max(d1, d2)
-                d2 = math.abs(dp)
-                s = math.max(d1, d2)
+                d1 = abs(theta)
+                d2 = abs(dy[0])
+                d1 = max(d1, d2)
+                d2 = abs(dp)
+                s = max(d1, d2)
                 d1 = theta / s
                 gamma = s * math.sqrt(d1 * d1 - dy[0] / s * (dp / s))
                 
@@ -412,18 +414,18 @@ class Mcsrch():
             fx[0] = fp
             dx[0] = dp
 
-        stpf = math.min(stpmax, stpf)
-        stpf = math.max(stpmin, stpf)
+        stpf = min(stpmax, stpf)
+        stpf = max(stpmin, stpf)
         stp[0] = stpf
 
         if brackt[0] and bound:
         
             if (sty[0] > stx[0]):
                 d1 = stx[0] + (sty[0] - stx[0]) * 0.66
-                stp[0] = math.min(d1, stp[0])
+                stp[0] = min(d1, stp[0])
             else:
                 d1 = stx[0] + (sty[0] - stx[0]) * 0.66
-                stp[0] = math.max(d1, stp[0])
+                stp[0] = max(d1, stp[0])
 
         return
 

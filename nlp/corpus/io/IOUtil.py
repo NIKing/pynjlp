@@ -54,7 +54,7 @@ def writeTxtByList(filePath, dataList):
 
     try:
         with open(filePath, "w", encoding='utf8') as file:
-           file.writelines('\n'.join(dataList))
+           file.writelines('\n'.join([str(d) for d in dataList]))
     except IOError as e:
         print('写入失败', e)
 
@@ -111,7 +111,8 @@ def readBinToList(path):
     with open(path, 'rb') as f:
         arr_bytes = f.read()
         arr_bytes = pickle.loads(arr_bytes)
-
+    
+    print('readBin', arr_bytes[:20])
     return arr_bytes
 
 def toExcel(path, data, columns):

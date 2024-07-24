@@ -19,7 +19,7 @@ class Instance():
         
         if id != -1:
             featureVector.append(id)
-
+    
     def toFeatureArray(self, featureVector) -> list:
         """
         特征向量转换数组
@@ -36,5 +36,14 @@ class Instance():
 
     def getFeatureAt(self, position):
         return self.featureMatrix[position]
+
+    @staticmethod
+    def addFeatureThenClear(rawFeature, featureVector, featureMap):
+        """添加特征，同时清空缓存"""
+        id = featureMap.idOf(''.join([str(r) for r in rawFeature]))
+        if id != -1:
+            featureVector.append(id)
+
+        rawFeature = []
 
 

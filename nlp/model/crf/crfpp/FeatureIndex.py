@@ -43,6 +43,7 @@ class FeatureIndex(ABC):
         return self.maxid
 
     def setMaxid(self, maxid):
+        """所有特征的标记总数"""
         self.maxid = maxid
 
     def getXsize(self):
@@ -56,6 +57,13 @@ class FeatureIndex(ABC):
 
     def setY(self, y):
         self.y = y
+    
+    def test_alpha(self):
+        # 看看现在时刻，特征空间的权重有咩用值？
+        for alpha in self.alpha:
+            if alpha > 0:
+                print('有值', alpha)
+                break
 
     def makeTempls(self, unigramTempls, bigramTempls):
         """
@@ -86,16 +94,20 @@ class FeatureIndex(ABC):
         
         feature = []
 
-        # tagger.size() 语料数量
+        # tagger.size() 句子的长度
+        # 根据一元语法模版编译句子的一元语法特征
         for cur in range(tagger.size()):
+
+            # 在buildFeatureFromTempl() 中会添加特征索引到 feature 
             if not self.buildFeatureFromTempl(feature, self.unigramTempls, cur, tagger):
                 return False
 
-            feature.append(-1)
+            feature.append(-1)              
             featureCache.append(feature)    # 这样会把feature添加到tagger对象中的featureCache吗？
 
             feature = []
-
+        
+        # 同样，根据二元语法模版编译句子的二元语法特征
         for cur in range(1, tagger.size()):
             if not self.buildFeatureFromTempl(feature, self.bigramTempls, cur, tagger):
                 return False
@@ -140,7 +152,7 @@ class FeatureIndex(ABC):
         fid = tagger.getFeature_id()
         featureCache = tagger.getFeatureCache()
         
-        # 设置节点
+        # 把句子特征可能的标记都转换节点, 每个特征都有不同标签的节点
         for cur in range(tagger.size()):
             f = featureCache[fid]
             fid += 1
@@ -155,6 +167,7 @@ class FeatureIndex(ABC):
                 tagger.set_node(n, cur, i)
         
         # 创建路径，但是并未看到路径保存呀？？？？
+        # 在p.add() 的时候会把路径添加给节点 -- 2024年7月13号
         for cur in range(1, tagger.size()):
             f = featureCache[fid]
             fid += 1
@@ -168,10 +181,11 @@ class FeatureIndex(ABC):
 
     def applyRule(self, templ, cur, tagger):
         """
-        应用规则
+        应用规则，根据特征模版创建特征字符串，会被当作创建特征索引的key
         -param templ 模版特征值, 比如：U3:%x[-2,0]%x[-1,0] 
-        -param cur   tagger实例中语料库的下标
-        -param tagger 标记对象
+        -param cur   tagger实例的句子中当前单词的下标
+        -param tagger 标记对象，句子
+        return 特征字符串
         """ 
         sb = []
         for tmp in templ.split("%x"):
@@ -208,10 +222,11 @@ class FeatureIndex(ABC):
         获取标记对象中特定元素的特征索引
         -param idxStr 特征模版中的索引值, 比如：U3:%x[-2,0]%x[-1,0] 中的 [-2,0]
         -param cur tagger实例中语料库的下标
-        -param tagger 标记对象
+        -param tagger 标记对象, 句子对象
+        return 句子中存在的单词
         """
         row, col = int(idxStr[0]), int(idxStr[1])
-        pos = row + cur     # 是特征所在句子中的位置，也是序列中的时刻
+        pos = row + cur     # 以当前词的位置 cur ，根据 row 向前或者向后获取上下文信息
 
         if row < -len(FeatureIndex.EOS) or row > len(FeatureIndex.EOS) or col < 0 or col >= tagger.xsize():
             return None
@@ -271,7 +286,7 @@ class FeatureIndex(ABC):
         
     def _calcCostNode(self, node):
         """
-        计算状态特征函数的代价
+        计算状态特征函数的代价, 节点的损失值
         -param node 节点
         """
         node.cost = 0.0
@@ -290,6 +305,8 @@ class FeatureIndex(ABC):
             c = 0.0
             i = 0
             
+            # 当前节点所对应的特征向量（节点是特征的所有可能标记）
+            # alpha 是在optimizer中计算的，在这之前只是初始化固定的长度，因此感觉这里计算cost也是初始化的过程
             while node.fVector[i] != -1:
                 c += self.alpha[node.fVector[i] + node.y]
                 i += 1

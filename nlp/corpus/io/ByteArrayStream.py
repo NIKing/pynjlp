@@ -1,4 +1,5 @@
 import numpy as np
+
 from nlp.corpus.io.IOUtil import readBinToList
 
 class ByteArrayStream():

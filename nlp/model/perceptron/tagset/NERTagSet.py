@@ -34,4 +34,4 @@ class NERTagSet(TagSet):
         if index != -1:
             return tag
 
-        return tag.[index + 1:]
+        return tag[index + 1:]

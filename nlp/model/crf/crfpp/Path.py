@@ -13,12 +13,14 @@ class Path():
         self.cost = 0.0
     
     def add(self, lnode, rnode):
-        """给自己添加左右节点的同时，也把自己添加到右节点的左边，左节点的右边"""
+        """"""
         self.lnode = lnode
         self.rnode = rnode
-
-        self.lnode.rpath.append(self)
-        self.rnode.lpath.append(self)
+        
+        # 注意，这个特别重要!!! 
+        # 在把节点赋值给路径的同时，也把路径添加到节点的两边
+        lnode.rpath.append(self)
+        rnode.lpath.append(self)
 
     def calcExpectation(self, expected, Z, size):
         """

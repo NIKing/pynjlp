@@ -28,6 +28,7 @@ class FeatureMap():
     def loadTagSet(self, byteArray):
         type_byte = byteArray.next()
         taskType = list(TaskType)[type_byte].value
+        #print('type_byte', type_byte, taskType)
 
         taskTypeMap = {
             'CLASSIFICATION': TagSet(TaskType.CLASSIFICATION),
