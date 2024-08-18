@@ -206,7 +206,7 @@ class LbfgsOptimizer():
             stpArr  = [self.stp]
             infoArr = [self.info]
             nfevArr = [self.nfev]
-
+            
             self.mcsrch.mcsrch(size, x, f, v, w, self.ispt + self.point * size, stpArr, infoArr, nfevArr, diag)
 
             self.stp  = stpArr[0]

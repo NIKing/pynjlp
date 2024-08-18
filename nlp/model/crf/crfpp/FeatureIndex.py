@@ -60,10 +60,13 @@ class FeatureIndex(ABC):
     
     def test_alpha(self):
         # 看看现在时刻，特征空间的权重有咩用值？
+        msg = '没有值'
         for alpha in self.alpha:
             if alpha > 0:
-                print('有值', alpha)
+                msg = f'有值={alpha}'
                 break
+
+        return msg
 
     def makeTempls(self, unigramTempls, bigramTempls):
         """
@@ -152,7 +155,7 @@ class FeatureIndex(ABC):
         fid = tagger.getFeature_id()
         featureCache = tagger.getFeatureCache()
         
-        # 把句子特征可能的标记都转换节点, 每个特征都有不同标签的节点
+        # 把句子每个token，所有可能的标记都转换节点, 每个token都有不同标签的节点
         for cur in range(tagger.size()):
             f = featureCache[fid]
             fid += 1

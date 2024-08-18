@@ -236,20 +236,24 @@ class TaggerImpl():
         for i in range(len(self.x)):
             for j in range(self.ysize):
                 self.node[i][j].calcExpectation(expected, self.Z, self.ysize)
+        
 
         for i in range(len(self.x)):
             fvector = self.node[i][self.answer[i]].fVector
             j = 0
             
+            # 节点上的正确标记的期望值，减少
             while fvector[j] != -1:
                 idx = fvector[j] + self.answer[i]
                 expected[idx] -= 1
 
                 j += 1
-
+            
+            # 节点上的正确标记的损失值，增加
             s += self.node[i][self.answer[i]].cost
+            
+            # 父节点与当前节点连接路径的期望值和损失值按照相同方法操作
             lpath = self.node[i][self.answer[i]].lpath
-
             for p in lpath:
                 if p.lnode.y == self.answer[p.lnode.x]:
                     k = 0
@@ -261,10 +265,11 @@ class TaggerImpl():
 
                     s += p.cost
                     break
-            
-            self.viterbi()
+        
+        # 维特比解码
+        self.viterbi()
 
-            return self.Z - s
+        return self.Z - s
 
 
     def buildLattice(self):
@@ -325,6 +330,7 @@ class TaggerImpl():
     
     def viterbi(self):
         """维特比解码"""
+        
         # 前向计算
         for i in range(len(self.x)):
             for j in range(self.ysize):

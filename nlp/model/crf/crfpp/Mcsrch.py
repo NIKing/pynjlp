@@ -84,13 +84,16 @@ class Mcsrch():
                     self.stmax = max(self.stx, self.sty)
                 else:
                     self.stmin = self.stx
+                    self.stmax = stp[0] + xtrapf * (stp[0] - self.stx)
                 
                 stp[0] = max(stp[0], Mcsrch.lb3_1_stpmin)
                 stp[0] = min(stp[0], Mcsrch.lb3_1_stpmax)
 
-                if self.brackt and ( \
-                        (stp[0] <= self.stmin or stp[0] >= self.stmax) or \
-                        (stp[0] > maxfev - 1 or self.infoc == 0) \
+                if (
+                        self.brackt and ( \
+                            (stp[0] <= self.stmin or stp[0] >= self.stmax) or \
+                            nfev[0] >= maxfev - 1 or \
+                            self.infoc == 0 ) \
                     ) or ( \
                         self.brackt and (self.stmax - self.stmin <= Mcsrch.xtol * self.stmax) \
                     ):
@@ -132,7 +135,7 @@ class Mcsrch():
             
             if self.stage1 and f <= ftest1 and dg >= min(Mcsrch.ftol, Mcsrch.lb3_1_gtol) * self.dginit:
                 self.stage1 = False
-
+            
             if self.stage1 and f <= self.fx and f > ftest1:
                 fm = f - stp[0] * self.dgtest
 
@@ -243,7 +246,12 @@ class Mcsrch():
         return res
 
     @staticmethod
-    def mcstep(stx, fx, dx, ty, fy, dy, tp, fp, dp, brackt, stpmin, dstpmax, info):
+    def mcstep(stx, fx, dx, 
+            sty, fy, dy, 
+            stp, fp, dp, 
+            brackt, 
+            stpmin, stpmax, 
+            info):
         bound = True
         info[0] = 0
         
@@ -254,9 +262,9 @@ class Mcsrch():
                 dx[0] * (stp[0] - stx[0]) >= 0.0 or stpmax < stpmin \
             ):
             return
-
-        sgnd = dp * (dx[0] / abs(dx[0]))
-
+        
+        sgnd = dp * (dx[0] / abs(dx[0])) if dx[0] != 0 else 0
+        
         if fp > fx[0]:
             info[0] = 1
             bound = True
@@ -264,10 +272,13 @@ class Mcsrch():
             
             d1 = abs(theta)
             d2 = abs(dx[0])
+            
             d1 = max(d1, d2)
             d2 = abs(dp)
-            s = max(d1, d2)
+            s  = max(d1, d2)
+            
             d1 = theta / s
+
             gamma = s * math.sqrt(d1 * d1 - dx[0] / s * (dp / s))
 
             if stp[0] < stx[0]:

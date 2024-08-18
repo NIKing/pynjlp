@@ -61,7 +61,7 @@ class Node():
 
             i += 1
         
-        # 重复计算每个子节点
+        # 重复计算每个父节点与当前节点连接路径期望值
         for p in self.lpath:
             p.calcExpectation(expected, Z, size)
 

@@ -125,7 +125,7 @@ class Encoder():
         # 真正瘦身在这里执行
         featureIndex.shrink(freq, x)
         
-        # size, 所以特征的标签总数
+        # size等于所有特征的标签总数
         # 当前虽然在这里 setAlpha() 了，但是给alpha赋值的地方在 LbfgsOptimizer.lbfgs_optimizer() 中
         alpha = [0.0] * featureIndex.size()
         featureIndex.setAlpha(alpha)
@@ -203,9 +203,7 @@ class Encoder():
         for i in range(len(x)):
             all_ += x[i].size()
         
-        print('执行线程')
-        print(featureIndex.test_alpha())
-
+        print('1'*9, featureIndex.test_alpha())
         for itr in range(maxItr):
             featureIndex.clear()
 
@@ -222,7 +220,7 @@ class Encoder():
                 print(f'线程错误:{e}')
                 return False
 
-            print('-----------------') 
+            print('2'*9, featureIndex.test_alpha())
             # 将所有线程数据汇总到第一个线程内
             for i in range(1, threadNum):
                 #print(i, threads[i].obj, threads[i].err, threads[i].zeroone)
@@ -282,6 +280,7 @@ class Encoder():
             if itr >= maxItr or converge >= 3:
                 break
             
+            print('3'*9, featureIndex.test_alpha())
             # 在这里会根据损失值和期望值，更新权重到 alpha
             # crf并没有在线学习机制，整个一起进行多线程计算损失值
             ret = lbfgs.optimize(featureIndex.size(), alpha, threads[0].obj, threads[0].expected, orthant, C)
