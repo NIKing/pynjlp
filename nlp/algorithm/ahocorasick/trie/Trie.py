@@ -39,15 +39,18 @@ class Trie():
     def parseText(self, text):
         self.checkForConstructedFailureStates()
 
-        position = 0
         currentState = self.rootState
-        
+        print('root:', currentState.toString())
+
         collectedEmits = []
         for i in range(len(text)):
+            # 获取当前状态节点到下一个字符的状态节点
             currentState = self.getState(currentState, text[i])
-            collectedEmits.extend(self.storeEmits(position, currentState))
+            print(f'{i}:',text[i], currentState.toString())
             
-            position += 1
+            # 收集当前字符状态节点的发射值（输出值）
+            collectedEmits.extend(self.storeEmits(i, currentState))
+            
 
         # 不允许重叠
         #if not self.trieConfig.isAllowOverlaps():
@@ -94,11 +97,31 @@ class Trie():
         """
         newCurrentState = currentState.nextState(character)
         while not newCurrentState:
+            print('-----', newCurrentState)
             currentState = currentState.getFailure()
-            newCurrentState = currentState.nextState(character)
 
+            #print('>>>>', currentState)
+            newCurrentState = currentState.nextState(character)
+        
         return newCurrentState
-    
+        
+    def storeEmits(self, position, currentState) -> list:
+        """
+        保存匹配结果
+        @param position 当前位置，也就是匹配到的模式串的结束位置 +1
+        @param currentStatue 当前状态
+        """
+        emits = currentState.emit()
+        if not emits or len(emits) <= 0:
+            return []
+        
+        collectedEmit = []
+        for emit in emits:
+            collectedEmit.append((position - len(emit) + 1, position, emit))
+
+        return collectedEmit
+
+
     def checkForConstructedFailureStates(self) -> bool:
         """检查是否建立了failure表"""
         if not self.failureStatesConstructed:
@@ -133,24 +156,7 @@ class Trie():
                 targetState.setFailure(newFailureState)
                 targetState.addEmit(newFailureState.emit())
 
-            print(currentState.toString())
-    
-    def storeEmits(self, position, currentState) -> list:
-        """
-        保存匹配结果
-        @param position 当前位置，也就是匹配到的模式串的结束位置 +1
-        @param currentStatue 当前状态
-        """
-        emits = currentState.emit()
-        if not emits or len(emits) <= 0:
-            return []
-        
-        collectedEmit = []
-        for emit in emits:
-            collectedEmit.append((position - len(emit) + 1, position, emit))
-
-        return collectedEmit
-
+            #print(currentState.toString())
 
             
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 a = np.array([598, 196])
-b = np.array([2, 3])
+b = np.array([2, 1])
 print(a)
 print(b)
 
@@ -29,3 +29,10 @@ r = 0
 for i, _a in enumerate(a_t):
     r += _a[0] * b_t[i][0]
 print(r)
+
+print('向量[2, 3]转置后的内积')
+r = 0
+for i, _b in enumerate(b_t):
+    r += _b[0] * b[i]
+print(r)
+print()

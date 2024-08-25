@@ -83,9 +83,9 @@ class State():
     def toString(self):
         sb = 'State{' \
                 f'depth={self.depth}' \
-                f',emits={self.emits}' \
-                f',success={self.success.keys()}' \
-                f',failure={self.failure}' \
+                f', emits={self.emits}' \
+                f', goto={self.success.keys()}' \
+                f', failure={None if self.failure == None else self.failure.toString()}' \
                 '}'
 
         return sb

@@ -47,6 +47,20 @@ def test_4():
     print(res)
 
 
+def test_5():
+    text = "今天，天气很好，我自己正在学习自然语言处理技术"
+    dicts = ['自然', '自然语言处理', '自己', '我自己'] # , '自己正'
+    
+    print(dicts)
+
+    trie = Trie(dicts)
+
+    words = []
+    for emit in trie.parseText(text):
+        words.append(emit)
+
+    print(words)
+
 if __name__ == '__main__':
     arguments = sys.argv
     debug = arguments[1] if len(arguments) > 1 else '1'
@@ -59,5 +73,7 @@ if __name__ == '__main__':
         test_3()
     elif debug == '-4':
         test_4()
+    elif debug == '-5':
+        test_5()
 
 
