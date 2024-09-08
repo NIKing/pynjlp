@@ -67,13 +67,14 @@ class Encoder():
         
         # open() 作用：
         # 1，读取模版数据，创建一元和二元语法模版对象，并生成模版字符串；
-        # 2，读取训练数据，创建标注集合(y)，统计训练数据的长度(xSize)；
+        # 2，读取训练数据，创建标注集合(y)，计算训练数据的最长长度(xSize)；
         # 3，当然，这里还有检查文件格式是否正确的功能；
         featureIndex = EncoderFeatureIndex(threadNum)
         if not featureIndex.open(templFile, trainFile):
             print('Fail to open [' + templFile + '] and [' + trainFile + ']')
         
-        x = []      # 收集taggerImpl 实例化对象，也可以认为是语料库的每个句子实例化对象
+        # x 等于 TaggerImpl 实例化对象的容器，也可以认为是语料库的每个句子实例化对象的容器
+        x = []      
         try:
             with open(trainFile, 'r', encoding = 'utf8') as br:
                 lineNo = 0
@@ -126,8 +127,9 @@ class Encoder():
         featureIndex.shrink(freq, x)
         
         # size等于所有特征的标签总数
-        # 当前虽然在这里 setAlpha() 了，但是给alpha赋值的地方在 LbfgsOptimizer.lbfgs_optimizer() 中
         alpha = [0.0] * featureIndex.size()
+        
+        # 当前虽然在这里 setAlpha() 了，但是给alpha赋值的地方在 LbfgsOptimizer.lbfgs_optimizer() 中
         featureIndex.setAlpha(alpha)
 
         print(f"Number of sentences: {len(x)}")
@@ -155,7 +157,8 @@ class Encoder():
             not self.runMIRA(x, featureIndex, alpha, maxitr, C, eta, shrinkingSize, threadNum):
                 print("MIRA excute error")
                 return False
-
+        
+        # 保存模型数据
         #if not featureIndex.save(modelFile, textModelFile, Encoder.MODEL_VERSION):
         #    print("Failed to save model")
         
@@ -205,6 +208,8 @@ class Encoder():
         
         print('1'*9, featureIndex.test_alpha())
         for itr in range(maxItr):
+            
+            # 类似于梯度清空？？？
             featureIndex.clear()
 
             try:
@@ -235,8 +240,9 @@ class Encoder():
 
             # 计算非零数量
             numNonZero = 0
-             
-            if orthant :    # 使用 L1 范数
+            
+            # 使用 L1 范数
+            if orthant :    
                 for k in range(featureIndex.size()):
                     threads[0].obj += Math.abs(alpha[k] / C)
                     if alpha[k] != 0.0:
@@ -282,7 +288,6 @@ class Encoder():
             
             print('3'*9, featureIndex.test_alpha())
             # 在这里会根据损失值和期望值，更新权重到 alpha
-            # crf并没有在线学习机制，整个一起进行多线程计算损失值
             ret = lbfgs.optimize(featureIndex.size(), alpha, threads[0].obj, threads[0].expected, orthant, C)
             if ret <= 0:
                 return False

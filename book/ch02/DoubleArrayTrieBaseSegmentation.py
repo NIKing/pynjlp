@@ -6,7 +6,7 @@ from nlp.corpus.io.IOUtil import loadDictionary
 
 from nlp.collection.trie.DoubleArrayTrieSearcher import Searcher
 from nlp.collection.trie.DoubleArrayTrie import DoubleArrayTrie
-from nlp.collection.trie.bintrie.HashCode import hash_code
+from nlp.collection.trie.bintrie.HashCode import hash_code, char_hash
 
 from nlp.seg.other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
 
@@ -95,11 +95,48 @@ def test_6():
     res = dat.parseText(text)
     print(res)
 
+
+def test_search():
+    
+ 
+    dictionary = createTinyDictionary()
+    dat = DoubleArrayTrie(dictionary)
+
+    dat.get('入门')
+    print('')
+    
+    ru_hash_code = hash_code("入")
+    men_hash_code = hash_code("门")
+    
+    print(f'"入"的hash_code = {ru_hash_code}')
+
+    # 需要从根节点开始找，不能跳过根节点, 根节点的base[0]的值等于1
+    p = ru_hash_code + 1
+    
+    # “入”的位置应该是经过一轮查询(p = b + hash_code + 1)后的p值
+    p = p + 1
+
+    print(f'"入"的新位置 = {p}')
+
+    base_b = dat.base[p]
+    print(f'base["入"] = {base_b}')
+    print('')
+
+    print(f'"门"的hash_code: {men_hash_code}')
+
+    p = base_b + men_hash_code + 1
+    print(f'"门"的新位置 = {p}')
+
+    print(f'check["门"] = {dat.check[p]}')
+    print('')
+
+    print(dat.toString())
+
 if __name__ == '__main__':
 
     arguments = sys.argv
     debug = arguments[1] if len(arguments) > 1 else '1'
-    
+
     if debug == '-1':
         test_1()
     elif debug == '-2':
@@ -112,6 +149,9 @@ if __name__ == '__main__':
         test_5()
     elif debug == '-6':
         test_6()
+
+    elif debug == '-7':
+        test_search()
 
 
     

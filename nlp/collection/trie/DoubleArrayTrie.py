@@ -339,9 +339,17 @@ class DoubleArrayTrie:
 
         b = self.base[nodePos]
         p = 0
-
+        
+        print(nodePos)
+        print(b)
+        print('')
         for i in range(pos, length):
+            print(keyChars[i])
             p = b + char_hash(keyChars[i]) + 1
+            print(p)
+            print(self.check[p])
+
+            print('')
             if b == self.check[p]:
                 b = self.base[p]
             else:

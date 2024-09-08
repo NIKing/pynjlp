@@ -36,7 +36,8 @@ class CRFTagger(ABC):
         @param algorithm     训练算法
         @return
         """
-
+        
+        # 初始化
         if algorithm == None:
             maxitr  = crf_learn.maxitr
             freq    = crf_learn.freq
