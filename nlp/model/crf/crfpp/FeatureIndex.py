@@ -152,10 +152,12 @@ class FeatureIndex(ABC):
         重新编译特征, 在这里重新生成 Node 对象
         -param tagger TaggerImpl 对象
         """
+        # 获取当前 taggerImpl 对象（整个句子），句子的初始特征长度（一般等于0）
+        # 以及特征缓存（根据语法模版编译的，存储在双数组字典树特征索引）
         fid = tagger.getFeature_id()
         featureCache = tagger.getFeatureCache()
         
-        # 把句子每个token，所有可能的标记都转换节点, 每个token都有不同标签的节点
+        # 句子中每个词的所有特征, 以及每个特征的所有标签，都转换成节点形式
         for cur in range(tagger.size()):
             f = featureCache[fid]
             fid += 1

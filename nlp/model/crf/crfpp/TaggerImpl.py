@@ -90,13 +90,17 @@ class TaggerImpl():
         return status
     
     def add_cols(self, line):
-        # line = 强	B，分割空格部位, cols = ['强','B']
+        """
+        收集训练数据
+        -param line 指训练集中每一行单词；比如：【强	B】通过分割空格部位得出 cols = ['强','B']
+        """
         cols = re.split("[\t ]", line)
         return self.add(cols)
 
     def add(self, cols):
         """
         这里添加的东西很多，比如：特征、特征对应的标记答案、特征节点
+        -param cols 训练数据中每行的列形式；比如: ['强','B']
         """
         xsize = self.feature_index.getXsize()
 
@@ -221,7 +225,7 @@ class TaggerImpl():
     def gradient(self, expected) -> float:
         """
         计算梯度
-        -param expected 梯度向量, 实际上是所有特征的所有可能标签组成的数组
+        -param expected  数组 是双数组字典树最大的编号值构建的数组
         return 损失函数
         """
         if len(self.x) <= 0:
@@ -233,6 +237,7 @@ class TaggerImpl():
         s = 0.0
         
         # 计算每个节点的期望值，实际上是计算每句话中的每个单词与四个标签集（1:4）的期望值，很像是隐马尔可夫模型中的发射概率
+        # ysize = 4；因为当前采用【B,M,E,S】标记
         for i in range(len(self.x)):
             for j in range(self.ysize):
                 self.node[i][j].calcExpectation(expected, self.Z, self.ysize)
@@ -279,10 +284,10 @@ class TaggerImpl():
             return
         
         # 重新编译特征，在这里给特征节点（Node）赋值属性，之前一直找不到节点计算的数据从哪儿来，现在知道了
-        # 与其说是给特征节点赋值，不如说就像函数名字一样，是在编译篱笆网络（有向无环图)
+        # 与其说是给特征节点赋值，不如说是在编译篱笆网络（有向无环图)
         self.feature_index.rebuildFeatures(self)
 
-        # 计算 花费（cost）， 也是损失值的意思
+        # 计算花费（cost）， 也是损失值的意思
         for i in range(len(self.x)):
             for j in range(self.ysize):
 

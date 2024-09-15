@@ -241,7 +241,7 @@ class Encoder():
             # 计算非零数量
             numNonZero = 0
             
-            # 使用 L1 范数
+            # 使用 L1 范数, 避免过拟合
             if orthant :    
                 for k in range(featureIndex.size()):
                     threads[0].obj += Math.abs(alpha[k] / C)
