@@ -67,14 +67,17 @@ class CWSInstance(Instance):
         next2Char = sentence[position + 2] if position < len(sentence) - 2 else self.CHAR_BEGIN
         nextChar = sentence[position + 1] if position < len(sentence) - 1 else self.CHAR_BEGIN
 
-        # 收集上下文件特征，组成特征向量
+        # 收集当前词的上下文特征列表 
         sbFeatureList = [
             (preChar, '1'), (curChar, '2'), (nextChar, '3'), 
             (pre2Char, '/', preChar, '4'), (preChar, '/', curChar, '5'), 
             (curChar, '/', nextChar, '6'), (nextChar, '/', next2Char, '7')
         ] 
-
+        
+        # 根据特征列表和特征映射，收集特征向量
+        # 注意在这里进行映射转换，featureVec是特征在特征空间中的映射
         for sbFeature in sbFeatureList:
             self.addFeature(sbFeature, featureVec, featureMap)
-
+        
+        # 返回数组形式
         return self.toFeatureArray(featureVec)

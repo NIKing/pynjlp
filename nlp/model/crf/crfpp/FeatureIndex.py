@@ -157,8 +157,10 @@ class FeatureIndex(ABC):
         fid = tagger.getFeature_id()
         featureCache = tagger.getFeatureCache()
         
-        # 句子中每个词的所有特征, 以及每个特征的所有标签，都转换成节点形式
+        # 句子中每个词的所有标签，都转换成节点形式
         for cur in range(tagger.size()):
+
+            # 当前词特征，保存到节点上
             f = featureCache[fid]
             fid += 1
 

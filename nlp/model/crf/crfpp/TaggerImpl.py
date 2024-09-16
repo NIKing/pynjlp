@@ -232,7 +232,7 @@ class TaggerImpl():
             return 0.0
 
         self.buildLattice()         # 编译篱笆网络
-        self.forwardbackward()      # 前向/后项计算
+        self.forwardbackward()      # 前向/后向计算
 
         s = 0.0
         
@@ -241,7 +241,6 @@ class TaggerImpl():
         for i in range(len(self.x)):
             for j in range(self.ysize):
                 self.node[i][j].calcExpectation(expected, self.Z, self.ysize)
-        
 
         for i in range(len(self.x)):
             fvector = self.node[i][self.answer[i]].fVector
@@ -316,18 +315,17 @@ class TaggerImpl():
         if len(self.x) <= 0:
             return
         
-        # 表示从序列开始到当前节点的所有可能路径的概率累积（前向）
+        # 从前向后，计算句子每个节点的前向损失值
         for i in range(len(self.x)):
             for j in range(self.ysize):
                 self.node[i][j].calcAlpha()
         
-        # 表示从当前节点到序列末端的所有可能路径的概率累积（后向）
+        # 从后向前，计算句子每个节点的后向损失值
         for i in range(len(self.x) - 1, -1, -1):
             for j in range(self.ysize):
                 self.node[i][j].calcBeta()
 
-        
-        # 第一个节点所有可能路径的概率累积
+        # 计算初始节点损失值
         self.Z = 0.0
         for j in range(self.ysize):
             self.Z = Node.logsumexp(self.Z, self.node[0][j].beta, j == 0)
