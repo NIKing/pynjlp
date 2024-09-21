@@ -47,13 +47,18 @@ class Node():
 
     def calcExpectation(self, expected, Z, size):
         """
-        计算期望值
-        -param expected 输出期望值
+        计算节点的期望值
+        -param expected 期望值采集器，其大小与Alpha大小一致
         -param Z 规范化因子
         -param size 标签个数
         """
+        
+        # math.exp(x) 返回自然数的指数值，即 e^x 次幂
+        # 通过计算当前节点(左边转移概率 + 右边转移概率 - 节点的损失值 - 归一化因子）的值
+        # 再求导，得出当前节点的期望值
         c = math.exp(self.alpha + self.beta - self.cost - Z)
         
+        # 计算当前节点所有特征的期望值
         i = 0
         while self.fVector[i] != -1:
             idx = self.fVector[i] + self.y
@@ -61,7 +66,7 @@ class Node():
 
             i += 1
         
-        # 重复计算每个父节点与当前节点连接路径期望值
+        # 计算当前节点与节点左路径的期望值
         for p in self.lpath:
             p.calcExpectation(expected, Z, size)
 

@@ -25,10 +25,13 @@ class Path():
     def calcExpectation(self, expected, Z, size):
         """
         计算边的期望值
-        -param expected 输出期望值
+        -param expected 期望值采集器，其大小与Alpha大小一致
         -param Z 规范化因子
         -param size 标签个数
         """
+
+        # 计算当前边的（左节点权重 + 当前边的损失值 + 右节点权重 - 归一化因子) 损失值
+        # 再进行求导计算
         c = math.exp(self.lnode.alpha + self.cost + self.rnode.beta - Z)
         
         i = 0
