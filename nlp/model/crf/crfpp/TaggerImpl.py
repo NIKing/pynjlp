@@ -247,13 +247,15 @@ class TaggerImpl():
             j = 0
             
             # 节点上的正确标记的期望值，减少
+            # 注意！！！ expected 是引用类型，在这里操作会影响到外部的变量
             while fvector[j] != -1:
                 idx = fvector[j] + self.answer[i]
                 expected[idx] -= 1
 
                 j += 1
             
-            # 节点上的正确标记的损失值，增加
+            # 节点上的正确标记的损失值，累加
+            # 注意！！！s 是临时变量，累加后直接返回
             s += self.node[i][self.answer[i]].cost
             
             # 父节点与当前节点连接路径的期望值和损失值按照相同方法操作

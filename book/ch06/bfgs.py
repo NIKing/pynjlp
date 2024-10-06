@@ -1,6 +1,6 @@
 import numpy as np
 
-def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter=10):
+def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter= 10):
     """
     BFGS optimization algorithm
 
@@ -29,8 +29,7 @@ def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter=10):
         # 梯度计算(x的导数, 一阶导数)，即 计算每个特征的变化率和方向
         grad = grad_f(x)
         
-        #print('grad:')
-        #print(grad)
+        print('grad:', grad)
         #print(np.linalg.norm(grad))
         #print('')
         if np.linalg.norm(grad) < tol:
@@ -41,8 +40,7 @@ def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter=10):
         # -1: 在神经网络中，我们总是希望能够最小化损失函数，因此往往我们需要沿着负梯度的方向更新参数，沿着负梯度方向更新参数，函数值会减小的最快。
         # 通过向量点积计算，获取两个向量的相似度（注意，点乘获取到的是标量，但是在这里H是二维的矩阵，而grad是一维的向量，因此点乘就发生了降维，得到不是标量而是向量）
         d = np.dot(H, grad) * (-1) # eg: [-2. -4]
-        #print('d:')
-        #print(d)
+        print('d:', d)
         #print(np.dot(grad, d))
         #print('')
 
@@ -51,9 +49,18 @@ def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter=10):
         # 寻找让目标函数下降最多的步长, 可以认为是学习率
         # x + alpha * d 表示线性计算，f(x + alpha * d) 表示移动到新位置后的损失值
         # alpha * np.dot(grad, d), 
-        alpha = 1.0
-        while f(x + alpha * d) > f(x) + 1e-4 * alpha * np.dot(grad, d):
-            alpha *= 0.5
+        #alpha = 1.0
+        #while f(x + alpha * d) > f(x) + 1e-4 * alpha * np.dot(grad, d):
+        #    alpha *= 0.5
+        
+        # 固定步长
+        #alpha = 0.3
+
+        # 随着迭代逐步增大
+        alpha = 0.1 * (n_iter + 1)
+
+        # 先小，中间大，后面小
+        #alpha = 0.5 * (1 - n_iter / max_iter)
         
         # Step 4: 计算下降的距离，并叠加之前的位置形成新的位置
         # update step
@@ -66,14 +73,16 @@ def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter=10):
         
         # Step 6: 更新 Hessian 矩阵，不过这个计算与公式不符???????
         # BFGS update
-        rho = 1.0 / np.dot(y, s)
+        rho = 1.0 / (np.dot(y, s) + 1e-10)
         I = np.eye(n)
-        H = np.dot((I - rho * np.outer(s, y)), np.dot(H, (I - rho * np.outer(y,s))) + rho * np.outer(s,s))
+        #H = np.dot((I - rho * np.outer(s, y)), np.dot(H, (I - rho * np.outer(y,s))) + rho * np.outer(s,s))
+
+        print('H:', H)
         
         # Step 7: 更新位置
         x = x_new
-        print(f'迭代{n_iter}: 新的位置={x}, 损失值={f(x)}, 方向={d}, 步长={alpha}')
-        #print('')
+        print(f'迭代{n_iter}: 新的位置={x_new}, 损失值={f(x)}, 方向={d}, 步长={alpha}')
+        print('')
 
     #print(f'H{n_iter}=')
     #print(H)
@@ -112,7 +121,7 @@ def grad_f(x):
 
 # x0 看作是输入的特征值，需要特别注意的是，f(x) 和 grad_f(x) 的设计中，它们的公式每项都与x0的两个特征值相关联，若修改x0，则同时也要修改这两个函数。
 x0 = np.array([0.0, 0.0])
-target_x = np.array([1, 2])
+target_x = np.array([10, 20])
 
 x_min, f_min, n_iter = bfgs(f, grad_f, x0)
 

@@ -149,7 +149,8 @@ class FeatureIndex(ABC):
 
     def rebuildFeatures(self, tagger):
         """
-        重新编译特征, 在这里重新生成 Node 对象
+        重新编译特征, 生成图模型
+        注意！！！会在这里重新生成 Node 对象，之前只是初始化空节点对象，在这里重新生成并赋值
         -param tagger TaggerImpl 对象
         """
         # 获取当前 taggerImpl 对象（整个句子），句子的初始特征长度（一般等于0）

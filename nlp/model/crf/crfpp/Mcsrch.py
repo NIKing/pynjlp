@@ -38,6 +38,19 @@ class Mcsrch():
 
 
     def mcsrch(self, size, x, f, g, s, startOffset, stp, info, nfev, wa):
+        """
+        线性查找 - 确定步长
+        -param size int 特征向量数量的大小
+        -param x float[] 权重向量, 外部的alpha[]
+        -param f float 损失值
+        -param g float[] 期望值向量
+        -param s float[] 存放临时数据的变量，在外面是 w
+        -param startOffset int 开始位置偏移量
+        -param stp float[] 范数计算得值
+        -param info float[]
+        -param nfev float[]
+        -param wa float[] Hesssian矩阵的对角线
+        """
         p5 = 0.5
         p66 = 0.66
         xtrapf = 4.0
@@ -53,7 +66,7 @@ class Mcsrch():
             if dginit >= 0.0:
                 return
 
-            nfev[0]= 0
+            nfev[0] = 0
             
             self.brackt = False
             self.stage1 = True
@@ -62,7 +75,8 @@ class Mcsrch():
             self.dgtest = Mcsrch.ftol * dginit
             self.width  = Mcsrch.lb3_1_stpmax - Mcsrch.lb3_1_stpmin
             self.width1 = self.width / p5
-
+            
+            # hessian 矩阵的对角线被覆盖了, wa 变成了alpha[]的备份
             for j in range(size):
                 wa[j] = x[j]
 
@@ -99,6 +113,7 @@ class Mcsrch():
                     ):
                         stp[0] = self.stx
                 
+                # 更新外部alpha[], wa的值是 x[] 的备份
                 for j in range(size):
                     x[j] = wa[j] + stp[0] * s[startOffset + j]
 
@@ -218,7 +233,7 @@ class Mcsrch():
     @staticmethod
     def sigma(x) -> float:
         """
-        符号函数，返回输入值的符号
+        符号函数，返回输入值的符号。或者称为阶越函数
         -param x float 
         """
         if x > 0:
@@ -232,11 +247,11 @@ class Mcsrch():
     def ddot(size, dx, offsetX, dy, offsetY) -> float:
         """
         向量的点积计算
-        -param size     向量的长度
-        -param dx       向量x 
-        -param offsetX  向量x的偏移量
-        -param dy       向量y
-        -param offsetY  向量y的偏移量
+        -param size     int 向量的长度
+        -param dx       float[] 向量x 
+        -param offsetX  int 向量x的偏移量
+        -param dy       float[] 向量y
+        -param offsetY  int 向量y的偏移量
         """
         res = 0.0
 
@@ -244,14 +259,27 @@ class Mcsrch():
             res += dx[i + offsetX] * dy[i + offsetY]
 
         return res
+    
+    @staticmethod
+    def daxpy(n, da, dx, offsetX, dy, offsetY):
+        """
+        线性计算：  y = y + a * x
+        -param n        int     向量长度大小
+        -param da       int     一个常量
+        -param dx       float[] 输入向量
+        -param offsetX  int     输入向量偏移量
+        -param dy       float[] 输出向量
+        -param offsetY  int     输出向量偏移量
+        """
+        for i in range(n):
+            dy[i + offsetY] += da * dx[i + offsetX]
 
     @staticmethod
-    def mcstep(stx, fx, dx, 
-            sty, fy, dy, 
-            stp, fp, dp, 
-            brackt, 
-            stpmin, stpmax, 
-            info):
+    def mcstep(stx, fx, dx, sty, fy, dy, stp, fp, dp, brackt, stpmin, stpmax, info):
+        """
+        计算步长
+        """
+
         bound = True
         info[0] = 0
         
