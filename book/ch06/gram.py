@@ -40,7 +40,7 @@ c = np.array([-2, -2, 0, -1, 0])
 d = np.array([2, 3])
 d_t = convert_t(d)
 
-# 计算两个相同向量的gram 矩阵
+print('计算两个相同向量, 得到一个gram 矩阵')
 print(a * a_t)
 print('*' * 20)
 
@@ -62,4 +62,7 @@ print(sum(a * b))
 print(sum(a * b * c))
 print(gram_tripl(a, b, c))
 #print(gram(a, c))
+
+print('计算两个不同向量的外积，它们都是行向量')
+print(a * b)
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter= 10):
+def bfgs(f, grad_f, x0, tol=7.89e-30, max_iter= 100):
     """
     BFGS optimization algorithm
 
@@ -126,6 +126,6 @@ target_x = np.array([10, 20])
 x_min, f_min, n_iter = bfgs(f, grad_f, x0)
 
 print('')
-print('estimated minimum:', x_min)
-print('function value at minimum:', f_min)
-print('number of iterations:', n_iter)
+print('到达的位置:', x_min)
+print('距离目标位置还需要多少:', f_min)
+print('迭代次数:', n_iter)

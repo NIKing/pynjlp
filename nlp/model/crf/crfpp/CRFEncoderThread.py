@@ -31,6 +31,7 @@ class CRFEncoderThread(threading.Thread):
         # 以当前线程为起点，以线程总数为步长，训练所有句子。
         # 比如：线程1训练[1,4,7]句子，线程2训练[2,6,9]这些句子
         for i in range(self.start_i, self.size, self.threadNum):
+            
             # 计算坡度，应该是梯度计算，寻找最低点, 这里调用 TaggerImpl 对象
             self.obj += self.x[i].gradient(self.expected)
            

@@ -129,7 +129,7 @@ class LbfgsOptimizer():
 
         # main iteration loop
         while True:
-            # 处理非第一次迭代
+            # 处理每一次迭代，更新H矩阵的对角线近似
             # 或是第一次迭代，且标记等于0的时候也可以，这时候进来就是为了处理 当使用L1 范数的时候，重新设置 xi[] 的值
             if not firstLoop or (firstLoop and iflag != 1 and iflag != 2):
                 self.iter += 1

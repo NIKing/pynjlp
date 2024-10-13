@@ -298,8 +298,25 @@ class Encoder():
         return True
 
 
-    def runMIRA(self):
-        pass
+    def runMIRA(self, x, featureIndex, alpha, maxItr, C, eta, shrinkingSize, threadNum):
+        """
+        MIRA（Margin Infused Relaxed Algorithm）是一种增量学习算法，主要用于分类。
+        核心思想：在每次迭代是，通过调整模型参数，尽可能使当前预测与正确标签之间损失最小化，同时在确保调整过程中，模型的整体参数变化尽量小。
+        -param x                List<TaggerImpl> 标记模版对象
+        -param featureIndex     EncoderFeatureIndex 编码特征索引
+        -param maxItr           Int 最大迭代次数
+        -param C                Float
+        -param eta              Float
+        -param shrinkingSize    Int 瘦身大小
+        -param threadNum        Int 线程数量
+        """
+
+        shrinkArr = [0] * len(x)
+        upperArr  = [0.0] * len(x)
+        
+        shrink = [shrinkArr]
+        upperBound = [upperArr]
+        
 
         
 
