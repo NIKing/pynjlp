@@ -110,17 +110,18 @@ class LbfgsOptimizer():
             for i in range(size):
                 diag[i] = 1.0
             
-            # ispt 存储[步长]数据在 w[] 中的索引; << 左位移 相当于 msize * 2, msize 默认值为 5
+            # ispt 存储[步长]在 w[] 中的索引; << 左位移 相当于 msize * 2, msize 默认值为 5
             self.ispt = size + (msize << 1)             
 
-            # iypt 存储[梯度差]数据在 w[] 中的索引，反映矩阵的方向上的变化
+            # iypt 存储[梯度差]在 w[] 中的索引；梯度差反映矩阵的方向上的变化
             self.iypt = self.ispt + size * msize       
             
-            # 对权重的扩展, 临时存储Hessian矩阵对角线的近似，不过，需要注意的是，这里对角线是与 v 进行相乘，具有调整步长的作用
+            # 对 w[] 的扩展, 临时存储Hessian矩阵对角线的近似
+            # 不过，需要注意的是，这里对角线diag 与 v 进行相乘（只是两个横向量逐一相乘，结果还是向量），具有调整[步长]的作用，反而言之没有处理梯度差
             for i in range(size):
                 w[self.ispt + i] = -v[i] * diag[i]
             
-            # 计算期望向量点积的倒数平方根，即得到一个缩放因子，在调整步长的时候保证数值的稳定
+            # 计算期望【向量点积】的倒数平方根，即得到一个缩放因子，在调整步长的时候保证数值的稳定
             try:
                 self.stp1 = 1.0 / math.sqrt(Mcsrch.ddot(size, v, 0, v, 0))
             except ZeroDivisionError:
@@ -129,7 +130,7 @@ class LbfgsOptimizer():
 
         # main iteration loop
         while True:
-            # 处理每一次迭代，更新H矩阵的对角线近似
+            # 处理每一次迭代(抛开第一次迭代)，更新H矩阵的对角线近似
             # 或是第一次迭代，且标记等于0的时候也可以，这时候进来就是为了处理 当使用L1 范数的时候，重新设置 xi[] 的值
             if not firstLoop or (firstLoop and iflag != 1 and iflag != 2):
                 self.iter += 1
@@ -231,7 +232,8 @@ class LbfgsOptimizer():
                 if self.iter == 1:
                     self.stp = self.stp1
                 
-                # 重新对 w 前面的数据进行赋值，注意下面的梯度变化率的计算与它有关
+                # 重新对 w 前面的数据(范围: size )进行赋值，注意下面的梯度变化率的计算与它有关
+                # 在w[] 初始化的时候都为 0，刚开始也只是从lspt开始赋值
                 for i in range(size):
                     w[i] = g[i]
             
@@ -260,6 +262,7 @@ class LbfgsOptimizer():
                 return -1
 
             # compute the new step and gradient change
+            # 计算新的梯度信息到 w[] 
             self.npt = self.point * size
             for i in range(size):
                 w[self.ispt + self.npt + i] = self.stp * w[self.ispt + self.npt + i]

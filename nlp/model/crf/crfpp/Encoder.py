@@ -286,7 +286,7 @@ class Encoder():
             if itr >= maxItr or converge >= 3:
                 break
             
-            print('3'*9, featureIndex.test_alpha())
+            #print('3'*9, featureIndex.test_alpha())
             # 在这里会根据损失值和期望值，更新权重到 alpha
             ret = lbfgs.optimize(featureIndex.size(), alpha, threads[0].obj, threads[0].expected, orthant, C)
             if ret <= 0:
