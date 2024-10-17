@@ -271,10 +271,12 @@ class LbfgsOptimizer():
             self.point += 1
             if self.point == msize:
                 self.point = 0
-
+            
+            # v 表示期望值，整个算法中不变；x 表示模型参数，会在mcsrch中更新
             gnorm = math.sqrt(Mcsrch.ddot(size, v, 0, v, 0))
             xnorm = max(1.0, math.sqrt(Mcsrch.ddot(size, x, 0, x, 0)))
             
+            # 如果说模型参数对比期望值比例很小，说明模型参数变化不再显著，模型趋于收敛
             if (gnorm / xnorm) <= Mcsrch.eps:
                 return 0
 
