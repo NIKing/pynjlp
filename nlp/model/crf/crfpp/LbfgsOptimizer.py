@@ -78,9 +78,9 @@ class LbfgsOptimizer():
         -param msize    int     内置参数 默认值 5
         -param x        float[] 最大特征索引组成的数组, 外部的alpha，需要给其设置值，感觉应该是每个特征权重值的存放位置
         -param f        float   损失值
-        -param g        float[] 期望值
-        -param diag     float[] 内置参数
-        -param w        float[] 内置参数
+        -param g        float[] 梯度向量
+        -param diag     float[] 内置参数, Hessian 矩阵对角线近似
+        -param w        float[] 内置参数, 临时向量，存放对角线、步长、梯度差等信息
         -param orthant  boolean 是否使用 L1
         -param C        float   系统设定的初始损失值
         -param v        float[] 内置参数（使用L1时它是具有Size大小的空数组，不使用的时候和 g 的值一样）
@@ -175,10 +175,11 @@ class LbfgsOptimizer():
                 # 对优化变量的边界进行约束或限制，确保变量保持在一定范围内
                 # 在这里具体用于调整步长，决定是否剪裁变量值，或在进行计算搜索方向时对变量进行额外处理？？？
                 bound = math.min(self.iter - 1, msize)
-
+                
+                # point 默认等于 0 ，后面会累加，最大不会超过mSize
                 cp = self.point
                 
-                # 对[步长]进行裁剪
+                # 对[步长]进行裁剪, v 实际上是梯度向量（期望值）
                 for i in range(size):
                     w[i] = -v[i]
 
@@ -289,7 +290,7 @@ class LbfgsOptimizer():
         -param size     int         特征数量大小
         -param x        float[]     最大特征索引组成的数组 
         -param f        float       损失值
-        -param g        float[]     期望值
+        -param g        float[]     梯度向量
         -param orthant  boolean     是否使用 L1 范数，默认 L2
         -param C        float       系统设定的损失值
         """
