@@ -29,7 +29,8 @@ class StructurePerceptron(LinearModel):
 
             # 这里有个问题，若 i 表示样本句子中第i个词语的，那么tagArray是表示句子每个字符的数组，下面的计算就不合理
             # 问题得以解决，tagArray是字符级别的序列，featureVector同样也是字符级别的特征向量，之前的代码有问题
-
+            
+            # 找到当前中心词的预测特征向量和标准特征向量，预测特征向量是根据维特比解码而来，标准特征向量是在实例对象上
             for j in range(len(featureVector) - 1):
                 goldFeature[j] = featureVector[j] * tagSet.size() + instance.tagArray[i]
                 predFeature[j] = featureVector[j] * tagSet.size() + guessLabel[i]

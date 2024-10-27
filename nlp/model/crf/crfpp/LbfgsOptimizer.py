@@ -153,7 +153,7 @@ class LbfgsOptimizer():
 
                     for i in range(size):
                         try:
-                            diag[i] = ys / yy               # 点积的比值看作是Hessian矩阵对角线项的缩放因子，反映了当前迭代中梯度与步长的相对变化      
+                            diag[i] = ys / yy   # 点积的比值看作是Hessian矩阵对角线项的缩放因子，反映了当前迭代中梯度与步长的相对变化      
                         except ZeroDivisionError:
                             if ys < 0 and yy == 0.0:
                                 diag[i] = float("-inf")
@@ -172,6 +172,8 @@ class LbfgsOptimizer():
                 w[size + cp - 1] = 1.0 / ys
 
                 
+                # *********** 计算方向 Start ***********
+
                 # 对优化变量的边界进行约束或限制，确保变量保持在一定范围内
                 # 在这里具体用于调整步长，决定是否剪裁变量值，或在进行计算搜索方向时对变量进行额外处理？？？
                 bound = math.min(self.iter - 1, msize)
@@ -209,7 +211,8 @@ class LbfgsOptimizer():
                     inmc = size + msize + cp
                     beta = w[inmc] - beta
                     iscn = self.ispt + cp * size
-
+                    
+                    # 对 w 进行线性计算，注意是倒数第二参数的 w 
                     Mcsrch.daxpy(size, beta, w, iscn, w, 0)
 
                     cp += 1
@@ -223,7 +226,12 @@ class LbfgsOptimizer():
                 # store the new search direction
                 for i in range(size):
                     w[self.ispt + self.point * size + i] = w[i]
-            
+
+            # ************** 计算方向 End **************
+           
+
+            # ************** 计算步长 Start **************
+
             # obtain the one-dimensional minimizer of the function
             # by using the line search routine Mcsrch
             if not firstLoop or (firstLoop and iflag != 1):
@@ -233,7 +241,7 @@ class LbfgsOptimizer():
                 if self.iter == 1:
                     self.stp = self.stp1
                 
-                # 重新对 w 前面的数据(范围: size )进行赋值，注意下面的梯度变化率的计算与它有关
+                # 重新对 w 前面的数据(范围: size )进行赋值，注意，下面的梯度变化率的计算与它有关
                 # 在w[] 初始化的时候都为 0，刚开始也只是从lspt开始赋值
                 for i in range(size):
                     w[i] = g[i]
@@ -243,6 +251,7 @@ class LbfgsOptimizer():
             infoArr = [self.info]   # 诊断信息，表示算法状态和退出信息； 状态有：[-1, 0, 1, 2, 3, 4, 5, 6] 这些是mcsrch()算法定义的状态
             nfevArr = [self.nfev]   # 表示目标函数被调用次数，衡量算法计算成本和收敛速度
             
+            # mcsrch 会更新 x, stpArr, infoArr, nfevArr, diag[:size]； 不会更新 f, v, w
             self.mcsrch.mcsrch(size, x, f, v, w, self.ispt + self.point * size, stpArr, infoArr, nfevArr, diag)
 
             self.stp  = stpArr[0]
@@ -261,9 +270,13 @@ class LbfgsOptimizer():
             if self.info != -1:
                 print('The line search routine mcsrch failed: error code:' + self.info)
                 return -1
+            
+            # ************** 计算步长 End **************
 
             # compute the new step and gradient change
-            # 计算新的梯度信息到 w[] 
+            # 计算新的步长和梯度信息到 w[], 注意！！！这是追加新的信息到 w[] 而不是更新
+            # 新的步长是 = 基于之前步长值 * 通过线性搜索的新的步长
+            # 新的梯度信息是 = 多线程计算的梯度信息 - 之前老的梯度信息
             self.npt = self.point * size
             for i in range(size):
                 w[self.ispt + self.npt + i] = self.stp * w[self.ispt + self.npt + i]

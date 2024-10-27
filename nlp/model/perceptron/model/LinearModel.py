@@ -266,8 +266,10 @@ class LinearModel():
             if i == 0:
                 allFeature[transitionFeatureIndex] = bos
                 for j in range(len(allLabel)):
+                    # 初始化首字符标签是什么，基本上是标签本身
                     preMatrix[0][j] = j
                     
+                    # 初始化首字符标签的分数
                     score = self.score(allFeature, j)
                     scoreMatrix[0][j] = score
                 
