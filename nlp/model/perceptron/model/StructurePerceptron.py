@@ -31,6 +31,7 @@ class StructurePerceptron(LinearModel):
             # 问题得以解决，tagArray是字符级别的序列，featureVector同样也是字符级别的特征向量，之前的代码有问题
             
             # 找到当前中心词的预测特征向量和标准特征向量，预测特征向量是根据维特比解码而来，标准特征向量是在实例对象上
+            # 不仅如此，标准特征向量是以当前字符的正确的标记，从当前字符的特征矩阵从提取出来的，意思就是下面的goldFeature 是当前字符特征矩阵中，全是B 或 全是A 的向量-- 2024年10月30日
             for j in range(len(featureVector) - 1):
                 goldFeature[j] = featureVector[j] * tagSet.size() + instance.tagArray[i]
                 predFeature[j] = featureVector[j] * tagSet.size() + guessLabel[i]
