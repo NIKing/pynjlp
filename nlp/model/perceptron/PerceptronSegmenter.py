@@ -51,7 +51,12 @@ class PerceptronSegmenter(PerceptronTagger):
 
     def createInstance(self, sentence, featureMap):
         return CWSInstance.create(sentence, featureMap)
+    
+    def get_char_feature(self, char):
+        if not char:
+            return ''
 
+        instance = CWSInstance(char, self.model.featureMap)
 
 
 

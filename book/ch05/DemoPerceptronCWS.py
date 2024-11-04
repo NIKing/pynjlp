@@ -14,11 +14,19 @@ def train():
 
 def load_model():
     return PerceptronLexicalAnalyzer(cwsModelFile = '/pynjlp/data/test/msr_cws_preceptron.bin')
-    
-if __name__ == '__main__':
-    segment = train()
 
-    #segment = load_model()
+def load_seg_model():
+    return PerceptronSegment('/pynjlp/data/test/msr_cws_preceptron.bin')
+
+if __name__ == '__main__':
+    segment_model = load_seg_model()
+    char_feature = segment_model.get_char_feature('参观了北京天安门')
+    print(char_feature)
+    exit();
+
+    #segment = train()
+    segment = load_model()
+
     sentences = [
         "王思斌，男，１９４９年１０月生。",
         "山东桓台县起凤镇穆寨村妇女穆玲英",
