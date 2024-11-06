@@ -220,8 +220,8 @@ class LinearModel():
 
         else:
             parameter = [0.0] * (size * tagSet.size())
-            print(size, tagSet.size())
-            print('加载的特征长度', len(parameter))
+            #print(size, tagSet.size())
+            #print('加载的特征长度', len(parameter))
             for i in range(size):
                 for j in range(tagSet.size()):
                     parameter[i * tagSet.size() + j] = byteArray.next()
@@ -260,6 +260,8 @@ class LinearModel():
             #print(f'i={i}={_i}')
 
             allFeature = instance.getFeatureAt(i)
+            print(i, allFeature)
+            print('------')
             transitionFeatureIndex = len(allFeature) - 1 # 承上启下，代表句子中上一个特征向量的标签
             
             # 首次转移特征
@@ -289,7 +291,7 @@ class LinearModel():
                     # 也是联合概率？？？上一个分数和当前分数
                     score = self.score(allFeature, curLabel)
                     curScore = scoreMatrix[_i_1][preLabel] + score
-                    
+                    print('')
                     if maxScore < curScore:
                         maxScore = curScore
                         
@@ -326,8 +328,12 @@ class LinearModel():
 
             if index < -1 or index >= self.featureMap.getSize():
                 raise ValueError('在打分时传入了非法的下标')
-
+            
+            print('index', index)
             index = index * self.featureMap.tagSet.size() + currentTag
+            print(index)
+            print('----')
+
             score += self.parameter[index]  # 累计特征权重
 
         return score

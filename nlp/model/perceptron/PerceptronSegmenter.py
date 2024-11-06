@@ -52,11 +52,43 @@ class PerceptronSegmenter(PerceptronTagger):
     def createInstance(self, sentence, featureMap):
         return CWSInstance.create(sentence, featureMap)
     
-    def get_char_feature(self, char):
+    def get_char_feature(self, sentence, char):
         if not char:
             return ''
 
-        instance = CWSInstance(char, self.model.featureMap)
+        instance = CWSInstance(sentence, self.model.featureMap)
+        char_position = sentence.find(char)
+
+        if char_position == -1:
+            return ''
+        
+        char_feature_vector = instance.getFeatureAt(char_position)
+
+        print(self.model.featureMap.tagSet.size())
+        
+        # 根据特征向量的去权重向量中取不同标签的权重
+        char_feature_matrix = [[] for i in char_feature_vector]
+        for i, index in enumerate(char_feature_vector):
+            
+            print('')
+            print(index)
+            feature_vector = []
+            for j, tag in enumerate(self.model.featureMap.allLabels()):
+                
+                if index < -1 or index >= self.model.featureMap.getSize():
+                    raise ValueError('非法下标')
+
+                index = index * self.model.featureMap.tagSet.size() + j
+                print(' ', index)
+
+                feature_vector.append(self.model.parameter[index])
+            
+            char_feature_matrix[i] = feature_vector
+            
+        print(instance.tagArray)
+        print(instance.featureMatrix)
+
+        print(char_feature_matrix)
 
 
 
