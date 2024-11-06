@@ -52,11 +52,8 @@ class CWSInstance(Instance):
         -param sentence 一个训练句子实例
         -param featureMap 特征集合
         """
-        # 特征向量
-        featureVec = []
         
         # 下面提取当前单词的上下文标签
-
         # 句子中，当前单词的上上一个的字符 / 上一个的字符
         pre2Char = sentence[position - 2] if position >= 2 else self.CHAR_BEGIN
         preChar = sentence[position - 1] if position >= 1 else self.CHAR_BEGIN
@@ -73,11 +70,19 @@ class CWSInstance(Instance):
             (pre2Char, '/', preChar, '4'), (preChar, '/', curChar, '5'), 
             (curChar, '/', nextChar, '6'), (nextChar, '/', next2Char, '7')
         ] 
-        
+        print(position)
+        print(sbFeatureList)
+
+        # 特征向量
+        featureVec = []
+
         # 根据特征列表和特征映射，收集特征向量
         # 注意在这里进行映射转换，featureVec是特征在特征空间中的映射
         for sbFeature in sbFeatureList:
             self.addFeature(sbFeature, featureVec, featureMap)
         
+        print(featureVec)
+        print('')
+
         # 返回数组形式
         return self.toFeatureArray(featureVec)

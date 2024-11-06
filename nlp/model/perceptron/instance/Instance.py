@@ -17,6 +17,7 @@ class Instance():
         """
         id = featureMap.idOf(''.join(rawFeature))
         
+        # 特征空间中有的，才能添加到特征向量中
         if id != -1:
             featureVector.append(id)
     

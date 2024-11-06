@@ -23,10 +23,10 @@ def load_seg_model():
 if __name__ == '__main__':
     
     # 只用来测试单个字符的特征
-    #segment_model = load_seg_model()
-    #char_feature = segment_model.get_char_feature('参观了北京天安门', '北')
-    #print(char_feature)
-    #exit();
+    segment_model = load_seg_model()
+    char_feature = segment_model.get_char_feature('参观了北京天安门', '北')
+    print(char_feature)
+    exit();
 
     #segment = train()
     segment = load_model()
