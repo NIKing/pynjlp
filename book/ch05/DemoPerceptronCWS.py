@@ -1,5 +1,7 @@
 import sys
-sys.path.append('/pynjlp')
+root_path = "/Users/jenny/Desktop"
+
+sys.path.append(root_path + '/pynjlp')
 
 
 from nlp.model.perceptron.CWSTrainer import CWSTrainer
@@ -9,16 +11,16 @@ from nlp.model.perceptron.PerceptronSegmenter import PerceptronSegmenter
 from src.corpus.MSR import MSR
 
 def train():
-    model = CWSTrainer().train(MSR.TRAIN_PATH, '/pynjlp/data/test/msr_cws_preceptron.bin', maxIteration=2, threadNum=0).getModel()
+    model = CWSTrainer().train(MSR.TRAIN_PATH, root_path + '/pynjlp/data/test/msr_cws_preceptron.bin', maxIteration=2, threadNum=0).getModel()
     segment = PerceptronLexicalAnalyzer(model)
 
     return segment
 
 def load_model():
-    return PerceptronLexicalAnalyzer(cwsModelFile = '/pynjlp/data/test/msr_cws_preceptron.bin')
+    return PerceptronLexicalAnalyzer(cwsModelFile = root_path + '/pynjlp/data/test/msr_cws_preceptron.bin')
 
 def load_seg_model():
-    return PerceptronSegmenter('/pynjlp/data/test/msr_cws_preceptron.bin')
+    return PerceptronSegmenter(root_path + '/pynjlp/data/test/msr_cws_preceptron.bin')
 
 if __name__ == '__main__':
     

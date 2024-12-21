@@ -17,7 +17,7 @@ class HiddenMarkovModel(ABC):
         self.emission_probability = deepcopy(emission_probability)
 
     def toLog(self):
-        """转换张量中概率值为对数概率值"""
+        """对张量中概率值取对数，以优化算法性能，提高计算效率和稳定性"""
         if not self.start_probability or \
                 not self.transition_probability or \
                 not self.emission_probability:
